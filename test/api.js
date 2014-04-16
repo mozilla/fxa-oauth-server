@@ -30,6 +30,7 @@ const VERIFY_GOOD = JSON.stringify({
     'fxa-verifiedEmail': VEMAIL
   }
 });
+const PUBKEY = unique(32).toString('hex');
 
 function mockAssertion() {
   var parts = url.parse(config.get('browserid.verificationUrl'));
@@ -302,10 +303,11 @@ describe('/v1', function() {
 
   });
 
-  describe('/token', function() {
+  const PUBKEY_ROUTE = '/pubkey';
+  describe(PUBKEY_ROUTE, function() {
 
     it('disallows GET', function(done) {
-      Server.api.get('/token').then(function(res) {
+      Server.api.get(PUBKEY_ROUTE).then(function(res) {
         assert.equal(res.statusCode, 404);
       }).done(done, done);
     });
@@ -313,7 +315,226 @@ describe('/v1', function() {
     describe('?client_id', function() {
       it('is required', function(done) {
         Server.api.post({
-          url: '/token',
+          url: PUBKEY_ROUTE,
+          payload: {
+            client_secret: secret,
+            pubkey: PUBKEY,
+            code: unique.code().toString('hex')
+          }
+        }).then(function(res) {
+          assertRequestParam(res.result, 'client_id');
+        }).done(done, done);
+      });
+    });
+
+    describe('?client_secret', function() {
+      it('is required', function(done) {
+        Server.api.post({
+          url: PUBKEY_ROUTE,
+          payload: {
+            client_id: clientId,
+            pubkey: PUBKEY,
+            code: unique.code().toString('hex')
+          }
+        }).then(function(res) {
+          assertRequestParam(res.result, 'client_secret');
+        }).done(done, done);
+      });
+
+      it('must match server-stored secret', function(done) {
+        Server.api.post({
+          url: PUBKEY_ROUTE,
+          payload: {
+            client_id: clientId,
+            client_secret: unique.secret().toString('hex'),
+            pubkey: PUBKEY,
+            code: unique.code().toString('hex')
+          }
+        }).then(function(res) {
+          assert.equal(res.statusCode, 400);
+          assert.equal(res.result.message, 'Incorrect secret');
+        }).done(done, done);
+      });
+    });
+
+    describe('?pubkey', function() {
+      it('is required', function(done) {
+        Server.api.post({
+          url: PUBKEY_ROUTE,
+          payload: {
+            client_id: clientId,
+            client_secret: secret,
+            code: unique.code().toString('hex')
+          }
+        }).then(function(res) {
+          assertRequestParam(res.result, 'pubkey');
+        }).done(done, done);
+      });
+    });
+
+    describe('?code', function() {
+      it('is required', function(done) {
+        Server.api.post({
+          url: PUBKEY_ROUTE,
+          payload: {
+            client_id: clientId,
+            pubkey: PUBKEY,
+            client_secret: secret
+          }
+        }).then(function(res) {
+          assertRequestParam(res.result, 'code');
+        }).done(done, done);
+      });
+
+      it('must match an existing code', function(done) {
+        Server.api.post({
+          url: PUBKEY_ROUTE,
+          payload: {
+            client_id: clientId,
+            client_secret: secret,
+            pubkey: PUBKEY,
+            code: unique.code().toString('hex')
+          }
+        }).then(function(res) {
+          assert.equal(res.result.code, 400);
+          assert.equal(res.result.message, 'Unknown code');
+        }).done(done, done);
+      });
+
+      it('must be a code owned by this client', function(done) {
+        var secret2 = unique.secret();
+        var client2 = {
+          name: 'client2',
+          secret: secret2,
+          redirectUri: 'https://example.domain',
+          imageUri: 'https://example.foo.domain/logo.png',
+          whitelisted: true
+        };
+        db.registerClient(client2).then(function() {
+          mockAssertion().reply(200, VERIFY_GOOD);
+          return Server.api.post({
+            url: '/authorization',
+            payload: authParams({
+              client_id: client2.id.toString('hex')
+            })
+          }).then(function(res) {
+            return url.parse(res.result.redirect, true).query.code;
+          });
+        }).then(function(code) {
+          return Server.api.post({
+            url: PUBKEY_ROUTE,
+            payload: {
+              // client is trying to use client2's code
+              client_id: clientId,
+              client_secret: secret,
+              pubkey: PUBKEY,
+              code: code
+            }
+          });
+        }).then(function(res) {
+          assert.equal(res.result.code, 400);
+          assert.equal(res.result.message, 'Incorrect code');
+        }).done(done, done);
+
+      });
+
+      it('must not have expired', function(_done) {
+        this.slow(200);
+        var exp = config.get('expiration.code');
+        config.set('expiration.code', 50);
+        function done() {
+          config.set('expiration.code', exp);
+          _done.apply(this, arguments);
+        }
+        mockAssertion().reply(200, VERIFY_GOOD);
+        Server.api.post({
+          url: '/authorization',
+          payload: authParams()
+        }).then(function(res) {
+          return url.parse(res.result.redirect, true).query.code;
+        }).delay(60).then(function(code) {
+          return Server.api.post({
+            url: PUBKEY_ROUTE,
+            payload: {
+              client_id: clientId,
+              client_secret: secret,
+              pubkey: PUBKEY,
+              code: code
+            }
+          });
+        }).then(function(res) {
+          assert.equal(res.result.code, 400);
+          assert.equal(res.result.message, 'Expired code');
+        }).done(done, done);
+      });
+    });
+
+    describe('response', function() {
+      it('should return a correct response', function(done) {
+        mockAssertion().reply(200, VERIFY_GOOD);
+        Server.api.post({
+          url: '/authorization',
+          payload: authParams({
+            scope: 'foo bar bar'
+          })
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          return Server.api.post({
+            url: PUBKEY_ROUTE,
+            payload: {
+              client_id: clientId,
+              client_secret: secret,
+              code: url.parse(res.result.redirect, true).query.code,
+              pubkey: PUBKEY
+            }
+          });
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          assert.equal(res.result.type, 'gryphon');
+          assert.equal(res.result.scope, 'foo bar');
+        }).done(done, done);
+      });
+
+      it('should error if pubkey already in use', function(done) {
+        mockAssertion().reply(200, VERIFY_GOOD);
+        Server.api.post({
+          url: '/authorization',
+          payload: authParams({
+            scope: 'foo bar bar'
+          })
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          return Server.api.post({
+            url: PUBKEY_ROUTE,
+            payload: {
+              client_id: clientId,
+              client_secret: secret,
+              code: url.parse(res.result.redirect, true).query.code,
+              pubkey: PUBKEY
+            }
+          });
+        }).then(function(res) {
+          assert.equal(res.statusCode, 400);
+          assert.equal(res.result.message, 'Existing pubkey');
+          assert.equal(res.result.errno, 109);
+        }).done(done, done);
+      });
+    });
+  });
+
+  const TOKEN_ROUTE = '/token';
+  describe(TOKEN_ROUTE, function() {
+
+    it('disallows GET', function(done) {
+      Server.api.get(TOKEN_ROUTE).then(function(res) {
+        assert.equal(res.statusCode, 404);
+      }).done(done, done);
+    });
+
+    describe('?client_id', function() {
+      it('is required', function(done) {
+        Server.api.post({
+          url: TOKEN_ROUTE,
           payload: {
             client_secret: secret,
             code: unique.code().toString('hex')
@@ -327,7 +548,7 @@ describe('/v1', function() {
     describe('?client_secret', function() {
       it('is required', function(done) {
         Server.api.post({
-          url: '/token',
+          url: TOKEN_ROUTE,
           payload: {
             client_id: clientId,
             code: unique.code().toString('hex')
@@ -339,7 +560,7 @@ describe('/v1', function() {
 
       it('must match server-stored secret', function(done) {
         Server.api.post({
-          url: '/token',
+          url: TOKEN_ROUTE,
           payload: {
             client_id: clientId,
             client_secret: unique.secret().toString('hex'),
@@ -355,7 +576,7 @@ describe('/v1', function() {
     describe('?code', function() {
       it('is required', function(done) {
         Server.api.post({
-          url: '/token',
+          url: TOKEN_ROUTE,
           payload: {
             client_id: clientId,
             client_secret: secret
@@ -367,7 +588,7 @@ describe('/v1', function() {
 
       it('must match an existing code', function(done) {
         Server.api.post({
-          url: '/token',
+          url: TOKEN_ROUTE,
           payload: {
             client_id: clientId,
             client_secret: secret,
@@ -400,7 +621,7 @@ describe('/v1', function() {
           });
         }).then(function(code) {
           return Server.api.post({
-            url: '/token',
+            url: TOKEN_ROUTE,
             payload: {
               // client is trying to use client2's code
               client_id: clientId,
@@ -431,7 +652,7 @@ describe('/v1', function() {
           return url.parse(res.result.redirect, true).query.code;
         }).delay(60).then(function(code) {
           return Server.api.post({
-            url: '/token',
+            url: TOKEN_ROUTE,
             payload: {
               client_id: clientId,
               client_secret: secret,
@@ -456,25 +677,23 @@ describe('/v1', function() {
         }).then(function(res) {
           assert.equal(res.statusCode, 200);
           return Server.api.post({
-            url: '/token',
+            url: TOKEN_ROUTE,
             payload: {
               client_id: clientId,
               client_secret: secret,
-              code: url.parse(res.result.redirect, true).query.code
+              code: url.parse(res.result.redirect, true).query.code,
             }
           });
         }).then(function(res) {
           assert.equal(res.statusCode, 200);
+          assert.equal(res.result.access_token.length, 64);
           assert.equal(res.result.token_type, 'bearer');
-          assert(res.result.access_token);
-          assert.equal(res.result.access_token.length,
-            config.get('unique.token') * 2);
           assert.equal(res.result.scope, 'foo bar');
         }).done(done, done);
       });
+
     });
   });
-
   describe('/client/:id', function() {
     describe('response', function() {
       it('should return the correct response', function(done) {
@@ -492,7 +711,7 @@ describe('/v1', function() {
 
   describe('/verify', function() {
 
-    describe('response', function() {
+    describe('token response', function() {
       it('should return the correct response', function(done) {
         mockAssertion().reply(200, VERIFY_GOOD);
         Server.api.post({
@@ -512,10 +731,48 @@ describe('/v1', function() {
           });
         }).then(function(res) {
           assert.equal(res.statusCode, 200);
+          var token = res.result.access_token;
           return Server.api.post({
             url: '/verify',
             payload: {
-              token: res.result.access_token
+              token: token
+            }
+          });
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          assert.equal(res.result.user, USERID);
+          assert.equal(res.result.scope[0], 'profile');
+          assert.equal(res.result.email, VEMAIL);
+        }).done(done, done);
+      });
+    });
+
+    describe('pubkey response', function() {
+      it('should return the correct response', function(done) {
+        mockAssertion().reply(200, VERIFY_GOOD);
+        var pubkey = unique(32).toString('hex');
+        Server.api.post({
+          url: '/authorization',
+          payload: authParams({
+            scope: 'profile'
+          })
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          return Server.api.post({
+            url: '/pubkey',
+            payload: {
+              client_id: clientId,
+              client_secret: secret,
+              pubkey: pubkey,
+              code: url.parse(res.result.redirect, true).query.code
+            }
+          });
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          return Server.api.post({
+            url: '/verify',
+            payload: {
+              pubkey: pubkey
             }
           });
         }).then(function(res) {
