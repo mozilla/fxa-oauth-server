@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 const db = require('../lib/db');
+const config = require('../lib/config').root();
 const assert = require('insist');
 const crypto = require('crypto');
 
@@ -61,6 +62,23 @@ describe('db', function() {
     it('4-byte encoding preserved', makeTest(randomString(8), '𝛑'));
 
 
+  });
+
+  describe('getEncodingInfo', function() {
+    it('should use utf8mb4', function() {
+      if (config.db.driver === 'memory') {
+        return assert.ok('getEncodingInfo has no meaning with memory impl');
+      }
+
+      return db.getEncodingInfo()
+        .then(function(info) {
+          /*jshint sub:true*/
+          assert.equal(info['character_set_connection'], 'utf8mb4');
+          assert.equal(info['character_set_database'], 'utf8mb4');
+          assert.equal(info['collation_connection'], 'utf8mb4_unicode_ci');
+          assert.equal(info['collation_database'], 'utf8mb4_unicode_ci');
+        });
+    });
   });
 
 });
