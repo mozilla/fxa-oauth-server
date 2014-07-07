@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 const db = require('../lib/db');
-const P = require('../lib/promise');
 const assert = require('insist');
 const crypto = require('crypto');
 
@@ -53,12 +52,14 @@ describe('db', function() {
                 assert.equal(void 0, cli);
               });
           });
-      }
+      };
     }
 
     it('2-byte encoding preserved', makeTest(randomString(8), 'Düsseldorf'));
     it('3-byte encoding preserved', makeTest(randomString(8), '北京')); // Beijing
-    it('4-byte encoding preserved', makeTest(randomString(8), '𝛑')); // U+1D6D1 MATHEMATICAL BOLD SMALL PI
+    // U+1D6D1 MATHEMATICAL BOLD SMALL PI
+    it('4-byte encoding preserved', makeTest(randomString(8), '𝛑'));
+
 
   });
 
