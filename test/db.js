@@ -74,7 +74,7 @@ describe('db', function() {
         .then(function(info) {
           /*jshint sub:true*/
           assert.equal(info['character_set_connection'], 'utf8mb4');
-          // travis-ci doesn't support mysql 5.6 yet, so dumb down this check slightly
+          // travis-ci doesn't support mysql 5.6 yet, so dumb down this check
           assert.equal(info['character_set_database'].indexOf('utf8'), 0);
           assert.equal(info['collation_connection'], 'utf8mb4_unicode_ci');
           assert.equal(info['collation_database'], 'utf8mb4_unicode_ci');
