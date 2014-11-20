@@ -11,7 +11,7 @@ const events = require('../lib/events');
 logger.debug('config', config);
 db.ping().done(function() {
   server.start(function() {
-    logger.info('start', server.info.uri);
+    logger.info('listening', server.info.uri);
   });
   events.start();
 }, function(err) {
