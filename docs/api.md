@@ -64,6 +64,9 @@ The currently-defined error responses are:
   - [DELETE /v1/client/:id][client-delete]
 - Developers
   - [POST /v1/developer/activate][developer-activate]
+- Users
+  - [GET /v1/user/tokens][user-tokens]
+  - [DELETE /v1/user/token/:id][user-token-delete]
 - [POST /v1/verify][verify]
 
 ### GET /v1/client/:id
@@ -469,6 +472,66 @@ A valid request will return JSON with these properties:
 }
 ```
 
+### GET /v1/user/tokens
+
+Gets a list of active tokens for a user. The `token_id` field of each token
+record is an opaque identifier that can be used to revoke the token.
+
+**Required scope:** `oauth:tokens`
+
+#### Request Parameters
+
+**Example:**
+
+```sh
+curl -v \
+-H "Authorization: Bearer 558f9980ad5a9c279beb52123653967342f702e84d3ab34c7f80427a6a37e2c0" \
+"https://oauth.accounts.firefox.com/v1/user/tokens"
+```
+
+#### Response
+
+A valid response will have a 200 status code and a list of token records:
+
+```json
+{
+  "tokens": [{
+    "token_id": "92784bc8b18985ae03a015bff9e6b6322e9a74a9673fa08bada418e4fb4e2f6a",
+    "client_id": "bc57cc3f2cfeb8c9",
+    "token_type": "bearer",
+    "scope": "profile:uid",
+    "created_at": 1432919962142
+  }, {
+    "token_id": "b0e7d5503130c72ba74ca238175f35609a65b8d441c7f09ac2cac43d469167f6",
+    "client_id": "77cae338e95db56c",
+    "token_type": "bearer",
+    "scope": "profile oauth:tokens",
+    "created_at": 1432920262142
+  }]
+}
+```
+
+### DELETE /v1/user/token/:id
+
+Revokes a token for an user.
+
+**Required scope:** `oauth:tokens`
+
+#### Request Parameters
+
+**Example:**
+
+```sh
+curl -v \
+-X DELETE \
+-H "Authorization: Bearer 558f9980ad5a9c279beb52123653967342f702e84d3ab34c7f80427a6a37e2c0" \
+"https://oauth.accounts.firefox.com/v1/user/token/92784bc8b18985ae03a015bff9e6b6322e9a74a9673fa08bada418e4fb4e2f6a"
+```
+
+#### Response
+
+A valid response will have a 204 response code and an empty body.
+
 [client]: #get-v1clientid
 [register]: #post-v1clientregister
 [clients]: #get-v1clients
@@ -480,3 +543,5 @@ A valid request will return JSON with these properties:
 [delete]: #post-v1destroy
 [verify]: #post-v1verify
 [developer-activate]: #post-v1developeractivate
+[user-tokens]: #get-v1usertokens
+[user-token-delete]: #delete-usertokenid
