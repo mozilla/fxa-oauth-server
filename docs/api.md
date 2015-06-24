@@ -460,6 +460,7 @@ A valid request will return JSON with these properties:
 - `client_id`: The client_id of the respective client.
 - `scope`: An array of scopes allowed for this token.
 - `email`: The email of the respective user.
+- `created_at`: The token creation time in milliseconds since Epoch.
 
 **Example:**
 
