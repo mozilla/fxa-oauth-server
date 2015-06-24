@@ -474,8 +474,8 @@ A valid request will return JSON with these properties:
 
 ### GET /v1/user/tokens
 
-Gets a list of active tokens for a user. The `token_id` field of each token
-record is an opaque identifier that can be used to revoke the token.
+Gets a list of active tokens for a user. The `id` field of each token record is
+an opaque identifier that can be used to revoke the token.
 
 **Required scope:** `oauth:tokens`
 
@@ -496,13 +496,13 @@ A valid response will have a 200 status code and a list of token records:
 ```json
 {
   "tokens": [{
-    "token_id": "92784bc8b18985ae03a015bff9e6b6322e9a74a9673fa08bada418e4fb4e2f6a",
+    "id": "92784bc8b18985ae03a015bff9e6b6322e9a74a9673fa08bada418e4fb4e2f6a",
     "client_id": "bc57cc3f2cfeb8c9",
     "token_type": "bearer",
     "scope": "profile:uid",
     "created_at": 1432919962142
   }, {
-    "token_id": "b0e7d5503130c72ba74ca238175f35609a65b8d441c7f09ac2cac43d469167f6",
+    "id": "b0e7d5503130c72ba74ca238175f35609a65b8d441c7f09ac2cac43d469167f6",
     "client_id": "77cae338e95db56c",
     "token_type": "bearer",
     "scope": "profile oauth:tokens",

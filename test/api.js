@@ -1448,7 +1448,7 @@ describe('/v1', function() {
   describe('user', function() {
 
     var clientId = unique.id();
-    var tok, uid, vemail;
+    var tok;
     before(function() {
       return db.registerClient({
         name: 'test/api/user',
@@ -1465,8 +1465,6 @@ describe('/v1', function() {
       })
       .then(function(data) {
         tok = data.token;
-        uid = data.uid;
-        vemail = data.email;
       });
     });
 
@@ -1483,7 +1481,7 @@ describe('/v1', function() {
 
           var tokenInfo = res.result.tokens[0];
           assert.equal(tokenInfo.client_id, clientId.toString('hex'));
-          assert.equal(tokenInfo.token_id, encrypt.hash(tok).toString('hex'));
+          assert.equal(tokenInfo.id, encrypt.hash(tok).toString('hex'));
         });
       });
     });
