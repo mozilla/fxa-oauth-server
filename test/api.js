@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+const crypto = require('crypto');
 const url = require('url');
 const assert = require('insist');
 const bidcrypto = require('browserid-crypto');
@@ -1442,6 +1443,77 @@ describe('/v1', function() {
         });
       });
     });
+  });
+
+  describe('user', function() {
+
+    var clientId = unique.id();
+    var tok;
+    before(function() {
+      return db.registerClient({
+        name: 'test/api/user',
+        id: clientId,
+        hashedSecret: encrypt.hash(unique.secret()),
+        redirectUri: 'https://example.domain',
+        imageUri: 'https://example.com/logo.png',
+        termsUri: 'https://example.com/legal/terms.html',
+        privacyUri: 'https://example.com/legal/privacy.html',
+        trusted: true
+      })
+      .then(function() {
+        return getUniqueUserAndToken(clientId.toString('hex'));
+      })
+      .then(function(data) {
+        tok = data.token;
+      });
+    });
+
+    describe('GET /user/tokens', function() {
+      it('should list tokens for a user', function() {
+        return Server.api.get({
+          url: '/user/tokens',
+          headers: {
+            authorization: 'Bearer ' + tok
+          }
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          assert.equal(res.result.tokens.length, 1);
+
+          var tokenInfo = res.result.tokens[0];
+          assert.equal(tokenInfo.client_id, clientId.toString('hex'));
+          assert.equal(tokenInfo.id, encrypt.hash(tok).toString('hex'));
+        });
+      });
+    });
+
+    describe('DELETE /user/token/:id', function() {
+      it('should delete tokens by ID', function() {
+        return Server.api.delete({
+          url: '/user/token/' + encrypt.hash(tok).toString('hex'),
+          headers: {
+            authorization: 'Bearer ' + tok
+          }
+        }).then(function(res) {
+          assert.equal(res.statusCode, 204);
+          return db.getToken(encrypt.hash(tok)).then(function(tok) {
+            assert.equal(tok, undefined);
+          });
+        });
+      });
+    });
+
+    it('should return an error for invalid tokens', function() {
+      var badTokId = crypto.randomBytes(32).toString('hex');
+      return Server.api.delete({
+        url: '/user/token/' + badTokId,
+        headers: {
+          authorization: 'Bearer ' + tok
+        }
+      }).then(function(res) {
+        assert.equal(res.statusCode, 400);
+      });
+    });
+
   });
 
 });
