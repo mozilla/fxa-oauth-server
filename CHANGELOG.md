@@ -1,3 +1,12 @@
+<a name="0.41.1"></a>
+### 0.41.1 (2015-07-30)
+
+
+#### Bug Fixes
+
+* **db:** we need to enforce only a minimum patch level (not {n,n+1}) ([39449aad](http://github.com/mozilla/fxa-oauth-server/commit/39449aad4943000616d7bada1a121cb192f9f3cc))
+* **token:** disable expiration error ([b14c3817](http://github.com/mozilla/fxa-oauth-server/commit/b14c38177dee513483893befe93233c174cd0b1c))
+
 <a name"0.41.0"></a>
 ## 0.41.0 (2015-07-07)
 
