@@ -1,3 +1,12 @@
+<a name="0.44.1"></a>
+### 0.44.1 (2015-09-08)
+
+
+#### Bug Fixes
+
+* **token:** disable expiration error ([d5dee035](http://github.com/mozilla/fxa-oauth-server/commit/d5dee0358583e6e6375a76a66029ef6e03165d2a))
+
+
 <a name="0.43.0"></a>
 ## 0.43.0 (2015-08-26)
 
