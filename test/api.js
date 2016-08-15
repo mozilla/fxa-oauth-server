@@ -2031,4 +2031,24 @@ describe('/v1', function() {
       });
     });
   });
+
+  describe('/services', function() {
+    describe('GET /services', function() {
+      it('should list connected services', function() {
+
+      });
+    });
+
+    describe('DELETE /services', function() {
+      it('should not delete by client and uid', function() {
+        // return Server.internal.api.delete({
+        //   url: '/services/' + id.toString('hex'),
+        //   headers: {
+        //     authorization: 'Bearer ' + tok,
+        //   }
+        // });
+      });
+    });
+
+  });
 });
