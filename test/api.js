@@ -132,8 +132,10 @@ function assertInvalidRequestParam(result, param) {
 /**
  *
  * @param {String} cId - hex client id
+ * @param {Object} [options] - custom options
  */
-function getUniqueUserAndToken(cId) {
+function getUniqueUserAndToken(cId, options) {
+  options = options || {};
   if (! cId) {
     throw new Error('No client id set');
   }
@@ -145,7 +147,7 @@ function getUniqueUserAndToken(cId) {
     clientId: buf(cId),
     userId: buf(uid),
     email: email,
-    scope: [auth.SCOPE_CLIENT_MANAGEMENT]
+    scope: options.scopes || [auth.SCOPE_CLIENT_MANAGEMENT]
   }).then(function (token) {
     return {
       uid: uid,
@@ -2032,21 +2034,96 @@ describe('/v1', function() {
     });
   });
 
-  describe('/services', function() {
-    describe('GET /services', function() {
-      it('should list connected services', function() {
+  describe('/client-tokens', function() {
+    var BAD_TOKEN = '0000000000000000000000000000000000000000000000000000000000000000';
 
+    describe('GET /client-tokens', function() {
+      it('should list connected services', function() {
+        var tok;
+        var id = unique.id();
+        var client = {
+          name: 'test/api/client-tokens/list',
+          id: id,
+          hashedSecret: encrypt.hash(unique.secret()),
+          redirectUri: 'https://example.domain',
+          imageUri: 'https://example.com/logo.png',
+          trusted: true
+        };
+
+        return db.registerClient(client)
+          .then(function () {
+            return getUniqueUserAndToken(id.toString('hex'), {
+              scopes: ['profile', 'clients:write']
+            });
+          })
+        .then(function (result) {
+          tok = result.token;
+        })
+        .then(function () {
+          return Server.api.get({
+            url: '/client-tokens',
+            headers: {
+              authorization: 'Bearer ' + tok
+            }
+          }).then(function (res) {
+            var result = res.result;
+            assert.ok(result[0].id);
+            assert.ok(result[0].lastAccessTimeFormatted, 'a few seconds ago');
+            assert.ok(result[0].name, 'test/api/client-tokens/list');
+          })
+        });
+      });
+
+      it('errors for invalid tokens', function() {
+        return Server.api.get({
+          url: '/client-tokens',
+          headers: {
+            authorization: 'Bearer ' + BAD_TOKEN
+          }
+        }).then(function (res) {
+          var result = res.result;
+          assert.equal(result.code, 401);
+          assert.equal(result.detail, 'Bearer token invalid');
+        })
+      });
+
+      it('requires auth', function() {
+        return Server.api.get({
+          url: '/client-tokens',
+          headers: {
+          }
+        }).then(function (res) {
+          var result = res.result;
+          assert.equal(result.code, 401);
+          assert.equal(result.detail, 'Bearer token not provided');
+        })
       });
     });
 
-    describe('DELETE /services', function() {
-      it('should not delete by client and uid', function() {
-        // return Server.internal.api.delete({
-        //   url: '/services/' + id.toString('hex'),
-        //   headers: {
-        //     authorization: 'Bearer ' + tok,
-        //   }
-        // });
+    describe('DELETE /client-tokens/{client_id}', function() {
+      it('errors for invalid tokens', function() {
+        return Server.api.delete({
+          url: '/client-tokens/' + clientId,
+          headers: {
+            authorization: 'Bearer ' + BAD_TOKEN
+          }
+        }).then(function (res) {
+          var result = res.result;
+          assert.equal(result.code, 401);
+          assert.equal(result.detail, 'Bearer token invalid');
+        })
+      });
+
+      it('requires auth', function() {
+        return Server.api.delete({
+          url: '/client-tokens/' + clientId,
+          headers: {
+          }
+        }).then(function (res) {
+          var result = res.result;
+          assert.equal(result.code, 401);
+          assert.equal(result.detail, 'Bearer token not provided');
+        })
       });
     });
 
