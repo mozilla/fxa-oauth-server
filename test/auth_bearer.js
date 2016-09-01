@@ -6,7 +6,7 @@
 
 const assert = require('insist');
 const authBearer = require('../lib/auth_bearer');
-const proxyquire = require('proxyquire');
+const proxyquire = require('proxyquire').noPreserveCache();
 const AppError = require('../lib/error');
 const P = require('../lib/promise');
 
@@ -20,10 +20,9 @@ var goodMocks = {
   './token': {
     verify: function () {
       return P.resolve({
-        // no space in scope below
         scope: ['bar:foo', 'clients:write'],
         user: 'bar'
-      })
+      });
     }
   }
 };
@@ -44,28 +43,7 @@ describe('authBearer', function() {
       authBearer.strategy().authenticate(mockRequest, function (err, result) {
         assert.equal(result.credentials.user, 'bar');
         done();
-      })
-    });
-
-    it('errors if token has wrong scope', function(done) {
-      var mocks = {
-        './token': {
-          verify: function () {
-            return P.resolve({
-              // no space in scope below
-              scope: ['bar:foo:clients:write'],
-              user: 'bar'
-            })
-          }
-        }
-      };
-      var authBearer = proxyquire('../lib/auth_bearer', mocks);
-      authBearer.strategy().authenticate(mockRequest, function (err, result) {
-        assert.equal(result, null);
-        assert.equal(err.message, 'Forbidden');
-        assert.equal(err.output.payload.message, 'Forbidden');
-        done();
-      })
+      });
     });
 
     it('errors if no Bearer in request', function(done) {
@@ -76,15 +54,14 @@ describe('authBearer', function() {
         assert.equal(result, null);
         assert.equal(err.output.payload.detail, 'Bearer token not provided');
         done();
-      })
+      });
     });
-
 
     it('errors if invalid token', function(done) {
       var mocks = {
         './token': {
           verify: function () {
-            return P.reject(AppError.invalidToken())
+            return P.reject(AppError.invalidToken());
           }
         }
       };
@@ -93,7 +70,7 @@ describe('authBearer', function() {
         assert.equal(err.output.payload.detail, 'Bearer token invalid');
         assert.equal(result, null);
         done();
-      })
+      });
     });
 
   });
