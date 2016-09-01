@@ -2296,6 +2296,7 @@ describe('/v1', function() {
     describe('DELETE /client-tokens/{client_id}', function() {
 
       it('deletes all tokens for some client id', function() {
+        var user2ClientWriteToken;
         return db.registerClient(client2)
           .then(function () {
             return getUniqueUserAndToken(client2Id.toString('hex'), {
@@ -2305,6 +2306,15 @@ describe('/v1', function() {
             });
           })
           .then(function () {
+            return getUniqueUserAndToken(client2Id.toString('hex'), {
+              uid: user2.uid,
+              email: user2.email,
+              scopes: ['profile', 'clients:write']
+            });
+          })
+          .then(function (res) {
+            user2ClientWriteToken = res.token;
+
             return Server.api.get({
               url: '/client-tokens',
               headers: {
@@ -2331,6 +2341,7 @@ describe('/v1', function() {
           })
           .then(function (res) {
             assert.equal(res.result.length, 1);
+
             return Server.api.delete({
               url: '/client-tokens/' + client1Id.toString('hex'),
               headers: {
@@ -2349,6 +2360,18 @@ describe('/v1', function() {
           .then(function (res) {
             assert.equal(res.result.code, 401, 'client:write token was deleted');
             assert.equal(res.result.detail, 'Bearer token invalid');
+          })
+          .then(function () {
+            return Server.api.get({
+              url: '/client-tokens',
+              headers: {
+                authorization: 'Bearer ' + user2ClientWriteToken
+              }
+            });
+          })
+          .then(function (res) {
+            assert.equal(res.statusCode, 200, 'user2 tokens not deleted');
+            assert.equal(res.result.length, 1);
           });
       });
 

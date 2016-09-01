@@ -5,29 +5,42 @@
 /*global describe,it*/
 
 const assert = require('insist');
-const authBearer = require('../lib/auth_bearer');
-const proxyquire = require('proxyquire').noPreserveCache();
+const mocks = require('./lib/mocks');
+const proxyquire = require('proxyquire');
 const AppError = require('../lib/error');
 const P = require('../lib/promise');
+const sinon = require('sinon');
 
-var mockRequest = {
+const modulePath = '../lib/auth_bearer';
+const mockRequest = {
   headers: {
     authorization: 'Bearer 0000000000000000000000000000000000000000000000000000000000000000'
   }
 };
 
-var goodMocks = {
-  './token': {
-    verify: function () {
+var dependencies = mocks.require([
+  { path: '../../../lib/token' }
+], modulePath, __dirname);
+
+describe('authBearer', function() {
+  var sandbox, authBearer;
+
+  beforeEach(function() {
+    sandbox = sinon.sandbox.create();
+
+    sandbox.stub(dependencies['../../../lib/token'], 'verify', function() {
       return P.resolve({
         scope: ['bar:foo', 'clients:write'],
         user: 'bar'
       });
-    }
-  }
-};
+    });
 
-describe('authBearer', function() {
+    authBearer = proxyquire(modulePath, dependencies);
+  });
+
+  afterEach(function() {
+    sandbox.restore();
+  });
 
   it('exports auth configuration', function() {
     assert.equal(authBearer.AUTH_SCHEME, 'authBearer');
@@ -38,8 +51,6 @@ describe('authBearer', function() {
 
   describe('authenticate', function() {
     it('provides credentials if token is valid', function(done) {
-      var authBearer = proxyquire('../lib/auth_bearer', goodMocks);
-
       authBearer.strategy().authenticate(mockRequest, function (err, result) {
         assert.equal(result.credentials.user, 'bar');
         done();
@@ -47,7 +58,6 @@ describe('authBearer', function() {
     });
 
     it('errors if no Bearer in request', function(done) {
-      var authBearer = proxyquire('../lib/auth_bearer', goodMocks);
       authBearer.strategy().authenticate({
         headers: {}
       }, function (err, result) {
@@ -58,16 +68,29 @@ describe('authBearer', function() {
     });
 
     it('errors if invalid token', function(done) {
-      var mocks = {
-        './token': {
-          verify: function () {
-            return P.reject(AppError.invalidToken());
-          }
-        }
-      };
-      var authBearer = proxyquire('../lib/auth_bearer', mocks);
+      sandbox.restore();
+      sandbox = sinon.sandbox.create();
+
+      sandbox.stub(dependencies['../../../lib/token'], 'verify', function() {
+        return P.reject(AppError.invalidToken());
+      });
+
+      authBearer = proxyquire(modulePath, dependencies);
       authBearer.strategy().authenticate(mockRequest, function (err, result) {
         assert.equal(err.output.payload.detail, 'Bearer token invalid');
+        assert.equal(result, null);
+        done();
+      });
+    });
+
+    it('errors if illegal token', function(done) {
+      authBearer = proxyquire(modulePath, dependencies);
+      authBearer.strategy().authenticate({
+        headers: {
+          authorization: 'Bearer foo'
+        }
+      }, function (err, result) {
+        assert.equal(err.output.payload.detail, 'Illegal Bearer token');
         assert.equal(result, null);
         done();
       });
