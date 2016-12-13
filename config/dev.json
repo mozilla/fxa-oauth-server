@@ -96,5 +96,5 @@
     "keyFile": "../config/key.json",
     "key": {}
   },
-  "fxaEnv": "development"
+  "allowHttpRedirects": true
 }
