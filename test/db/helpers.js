@@ -34,11 +34,11 @@ describe('getActiveClientTokens', function() {
     ];
   });
 
-  it('returns union of scope(sorted) and latest createdAt', function() {
+  it('returns union of sorted scopes and latest createdAt', function() {
     var res = helpers.getActiveClientTokens(activeClientIds);
     assert.equal(res[0].id, uid);
     assert.equal(res[0].name, '123Done');
-    assert.deepEqual(res[0].scope, [ 'clients:write', 'profile', 'profile:write' ]);
+    assert.deepEqual(res[0].scope, ['clients:write', 'profile', 'profile:write']);
     assert.equal(res[0].createdAt, '2017-01-28T14:28:16.219Z');
   });
 });
