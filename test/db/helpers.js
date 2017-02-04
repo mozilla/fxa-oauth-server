@@ -9,7 +9,7 @@ const unique = require('../../lib/unique');
 describe('getActiveClientTokens', function() {
   var uid;
   var activeClientIds;
-  beforeEach(function () {
+  beforeEach(function() {
     uid = unique(16).toString('hex');
 
     activeClientIds = [
@@ -30,7 +30,7 @@ describe('getActiveClientTokens', function() {
         createdAt: '2017-01-28T14:28:16.219Z',
         name: '123Done',
         scope: ['profile']
-      },
+      }
     ];
   });
 
