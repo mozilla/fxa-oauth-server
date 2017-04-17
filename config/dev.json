@@ -13,6 +13,7 @@
       "redirectUri": "http://127.0.0.1:8080/api/oauth",
       "trusted": true,
       "canGrant": false
+      ,"canSso": true
     },
     {
       "id": "325b4083e32fe8e7",
