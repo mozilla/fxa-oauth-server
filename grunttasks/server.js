@@ -7,7 +7,7 @@ module.exports = function (grunt) {
 
   grunt.config('nodemon', {
     dev: {
-      script: 'bin/server.js',
+      script: ['bin/server.js','bin/internal.js'] ,
       options: {
         args: ['--node-env=dev']
       }
