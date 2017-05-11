@@ -15,6 +15,17 @@
       "canGrant": false
     },
     {
+      "id": "3a7d05df0d8db810",
+      "name": "Firefox Notes",
+      "hashedSecret": "8182f4df9274c32c08f61f26ad0e003ca8b9755314b9467f069f84b8c14252c6",
+      "redirectUri": "https://716070611e535cc1608605bb18a26acf3c33d06a.extensions.allizom.org/",
+      "imageUri": "",
+      "canGrant": false,
+      "termsUri": "",
+      "privacyUri": "",
+      "trusted": true
+    },
+    {
       "id": "325b4083e32fe8e7",
       "hashedSecret": "ded3c396f28123f3fe6b152784e8eab7357c6806cb5175805602a2cd67f85080",
       "name": "321Done Untrusted",

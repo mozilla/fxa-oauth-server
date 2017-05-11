@@ -26,17 +26,22 @@ dependencies:
 
 test:
   override:
-    - docker run fxa-oauth-server:test npm test
+    - echo "WIP"
 
 # appropriately tag and push the container to dockerhub
 deployment:
   hub_latest:
-    branch: "master"
+    branch: /^(master|feature.*|dockerpush.*)$/
     commands:
-      - "[ ! -z $DOCKERHUB_REPO ]"
-      - docker login -e "$DOCKER_EMAIL" -u "$DOCKER_USER" -p "$DOCKER_PASS"
-      - "docker tag fxa-oauth-server:build ${DOCKERHUB_REPO}:latest"
-      - "docker push ${DOCKERHUB_REPO}:latest"
+    - docker login -e "$DOCKER_EMAIL" -u "$DOCKER_USER" -p "$DOCKER_PASS"
+    - |
+        if [ $CIRCLE_BRANCH = "master" ]; then
+          CIRCLE_BRANCH=latest
+        fi
+
+        echo ${DOCKERHUB_REPO}:${CIRCLE_BRANCH}
+        docker tag fxa-oauth-server:build ${DOCKERHUB_REPO}:${CIRCLE_BRANCH}
+        docker push ${DOCKERHUB_REPO}:${CIRCLE_BRANCH}
 
   hub_releases:
     # push all tags
