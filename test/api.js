@@ -589,6 +589,37 @@ describe('/v1', function() {
         });
       });
 
+      it('supports PKCE - code_challenge and code_challenge_method', function() {
+        mockAssertion().reply(200, VERIFY_GOOD);
+        return Server.api.post({
+          url: '/authorization',
+          payload: authParams({
+            response_type: 'code',
+            code_challenge_method: 'S256',
+            code_challenge: 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM',
+          })
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          assertSecurityHeaders(res);
+          assert(res.result.redirect);
+        });
+      });
+
+      it('supports code_challenge only with code response_type', function() {
+        mockAssertion().reply(200, VERIFY_GOOD);
+        return Server.api.post({
+          url: '/authorization',
+          payload: authParams({
+            response_type: 'token',
+            code_challenge_method: 'S256',
+            code_challenge: 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM',
+          })
+        }).then(function(res) {
+          assert.equal(res.statusCode, 400);
+          assert.equal(res.result.errno, 109);
+        });
+      });
+
       it('must not be something besides code or token', function() {
         mockAssertion().reply(200, VERIFY_GOOD);
         return Server.api.post({
