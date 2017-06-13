@@ -940,6 +940,7 @@ describe('/v1', function() {
           var code_verifier_bad = 'zwZ_yiNpe-UoGYW.oW95hTjRZ8j_d2kC';
           var code_challenge = 'iyW5ScKr22v_QL-rcW_EGlJrDSOymJvrlXlw4j7JBiQ';
           var secret2 = unique.secret();
+          var oauth_code;
           var client2 = {
             name: 'client2Public',
             hashedSecret: encrypt.hash(secret2),
@@ -964,24 +965,26 @@ describe('/v1', function() {
               return url.parse(res.result.redirect, true).query.code;
             });
           }).then(function(code) {
+            oauth_code = code;
+
             return Server.api.post({
               url: '/token',
               payload: {
                 client_id: client2.id.toString('hex'),
-                code: code,
+                code: oauth_code,
                 code_verifier: code_verifier_bad
               }
             });
           }).then(function(res) {
             assert.equal(res.statusCode, 400);
-            assert.equal(res.result.errno, 105, 'error is bad request');
-            assert.equal(res.result.message, 'Unknown code');
+            assert.equal(res.result.errno, 117);
+            assert.equal(res.result.message, 'Incorrect code_challenge');
           }).then(function(code) {
             return Server.api.post({
               url: '/token',
               payload: {
                 client_id: client2.id.toString('hex'),
-                code: code,
+                code: oauth_code,
                 code_verifier: code_verifier
               }
             });

@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 const assert = require('insist');
-const util = require('../lib/util')
+const util = require('../lib/util');
 
 describe('util', function () {
   describe('base64URLEncode', function () {
