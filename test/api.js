@@ -343,6 +343,45 @@ describe('/v1', function() {
       });
     });
 
+    describe('pkce', function() {
+      it('should fail if Public Client is not using code_challenge', function() {
+        var client = clientByName('Public Client PKCE');
+        mockAssertion().reply(200, VERIFY_GOOD);
+        return Server.api.post({
+          url: '/authorization',
+          payload: authParams({
+            client_id: client.id,
+            scope: 'profile profile:write profile:uid',
+          })
+        }).then(function(res) {
+          assert.equal(res.statusCode, 400);
+          assertSecurityHeaders(res);
+          assert.equal(res.result.errno, 118);
+          assert.equal(res.result.error, 'PKCE parameters missing');
+        });
+      });
+
+      it('only works with Public Clients', function() {
+        var client = clientByName('Mocha');
+        mockAssertion().reply(200, VERIFY_GOOD);
+        return Server.api.post({
+          url: '/authorization',
+          payload: authParams({
+            client_id: client.id,
+            scope: 'profile profile:write profile:uid',
+            response_type: 'code',
+            code_challenge_method: 'S256',
+            code_challenge: 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM',
+          })
+        }).then(function(res) {
+          assert.equal(res.statusCode, 400);
+          assertSecurityHeaders(res);
+          assert.equal(res.result.errno, 116);
+          assert.equal(res.result.message, 'Not a public client');
+        });
+      });
+    });
+
     describe('?client_id', function() {
 
       it('is required', function() {
@@ -590,10 +629,12 @@ describe('/v1', function() {
       });
 
       it('supports PKCE - code_challenge and code_challenge_method', function() {
+        var client = clientByName('Public Client PKCE');
         mockAssertion().reply(200, VERIFY_GOOD);
         return Server.api.post({
           url: '/authorization',
           payload: authParams({
+            client_id: client.id,
             response_type: 'code',
             code_challenge_method: 'S256',
             code_challenge: 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM',
