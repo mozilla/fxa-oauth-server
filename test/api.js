@@ -384,6 +384,52 @@ describe('/v1', function() {
       });
     });
 
+    describe('?derivedKeyBundle', function() {
+      it('should return the key bundle in PKCE flow', function() {
+        var derivedKeyBundle = 'BUNDLE_HERE';
+        var code_verifier = 'ywZ_yiNpe-UoGYW.oW95hTjRZ8j_d2kF';
+        var code_challenge = 'iyW5ScKr22v_QL-rcW_EGlJrDSOymJvrlXlw4j7JBiQ';
+        var secret2 = unique.secret();
+        var client2 = {
+          name: 'client2Public',
+          hashedSecret: encrypt.hash(secret2),
+          redirectUri: 'https://example.domain',
+          imageUri: 'https://example.foo.domain/logo.png',
+          trusted: true,
+          publicClient: true
+        };
+        return db.registerClient(client2).then(function() {
+          mockAssertion().reply(200, VERIFY_GOOD);
+          return Server.api.post({
+            url: '/authorization',
+            payload: authParams({
+              client_id: client2.id.toString('hex'),
+              response_type: 'code',
+              code_challenge_method: 'S256',
+              code_challenge: code_challenge,
+              derivedKeyBundle: derivedKeyBundle
+            })
+          }).then(function(res) {
+            assert.equal(res.statusCode, 200);
+            return url.parse(res.result.redirect, true).query.code;
+          });
+        }).then(function(code) {
+          return Server.api.post({
+            url: '/token',
+            payload: {
+              client_id: client2.id.toString('hex'),
+              code: code,
+              code_verifier: code_verifier
+            }
+          });
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          assert.equal(res.result.derivedKeyBundle, derivedKeyBundle);
+        });
+
+      });
+    });
+
     describe('?client_id', function() {
 
       it('is required', function() {
