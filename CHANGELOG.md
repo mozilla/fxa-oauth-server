@@ -1,3 +1,12 @@
+<a name"1.90.1"></a>
+### 1.90.1 (2017-07-11)
+
+
+#### Bug Fixes
+
+* **nodejs:** update to node:4.8.4-alpine ([bc9d9a7a](https://github.com/mozilla/fxa-oauth-server/commit/bc9d9a7a))
+
+
 <a name"1.90.0"></a>
 ## 1.90.0 (2017-06-28)
 
