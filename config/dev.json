@@ -25,6 +25,45 @@
       "publicClient": true
     },
     {
+      "id": "c6d74070a481bc10",
+      "name": "Firefox Notes",
+      "hashedSecret": "9c716ed2927c96cdc0fb7efe57d5f124fb4161066c1ff7f4263069822256ec3f",
+      "redirectUri": "https://dee85c67bd72f3de1f0a0fb62a8fe9b9b1a166d7.extensions.allizom.org",
+      "imageUri": "",
+      "canGrant": false,
+      "termsUri": "",
+      "privacyUri": "",
+      "trusted": true,
+      "publicClient": true,
+      "applicationScopes": [
+        {
+          "name": "https://identity.mozilla.org/apps/notes",
+          "desc": "Manage your notes"
+        },
+        {
+          "name": "https://identity.mozilla.org/apps/notes.readonly",
+          "desc": "View your notes"
+        }
+      ]
+    },
+    {
+      "id": "9799191b3b640946",
+      "name": "Lockbox",
+      "hashedSecret": "ff21e63cbece4d0b987521ea2f1e56e16220be02426151bbea3b4f63a077fbe4",
+      "redirectUri": "https://lockbox.mozilla.org",
+      "imageUri": "",
+      "canGrant": false,
+      "termsUri": "",
+      "privacyUri": "",
+      "trusted": true,
+      "applicationScopes": [
+        {
+          "name": "https://identity.mozilla.org/sync",
+          "desc": "Manage your sync data"
+        }
+      ]
+    },
+    {
       "id": "325b4083e32fe8e7",
       "hashedSecret": "ded3c396f28123f3fe6b152784e8eab7357c6806cb5175805602a2cd67f85080",
       "name": "321Done Untrusted",
