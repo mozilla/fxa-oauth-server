@@ -43,7 +43,17 @@
       "termsUri": "",
       "privacyUri": "",
       "trusted": true,
-      "publicClient": true
+      "publicClient": true,
+      "applicationScopes": [
+        {
+          "name": "https://identity.mozilla.org/apps/notes",
+          "desc": "Manage your notes"
+        },
+        {
+          "name": "https://identity.mozilla.org/apps/notes.readonly",
+          "desc": "View your notes"
+        }
+      ]
     },
     {
       "id": "98e6508e88680e1a",
