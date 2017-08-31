@@ -44,16 +44,7 @@
       "privacyUri": "",
       "trusted": true,
       "publicClient": true,
-      "applicationScopes": [
-        {
-          "name": "https://identity.mozilla.org/apps/notes",
-          "desc": "Manage your notes"
-        },
-        {
-          "name": "https://identity.mozilla.org/apps/notes.readonly",
-          "desc": "View your notes"
-        }
-      ]
+      "applicationScope": "https://identity.mozilla.org/apps/notes"
     },
     {
       "id": "98e6508e88680e1a",
@@ -117,6 +108,13 @@
       "redirectUri": "urn:ietf:wg:oauth:2.0:oob",
       "trusted": true,
       "canGrant": true
+    }
+  ],
+  "applicationScopes": [
+    {
+      "applicationScope": "https://identity.mozilla.org/apps/notes",
+      "salt": "289a885946ee316844d9ffd0d725ee714901548a1e6507f1a40fb3c2ae0c99f1",
+      "description": "Read and write access to Notes"
     }
   ],
   "localRedirects": true,
