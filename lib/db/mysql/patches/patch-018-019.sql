@@ -6,5 +6,6 @@ CREATE TABLE applicationScopes (
 ) ENGINE=InnoDB;
 
 ALTER TABLE clients ADD COLUMN applicationScope VARCHAR(255);
+ALTER TABLE codes ADD COLUMN derivedKeyBundle VARCHAR(1024);
 
 UPDATE dbMetadata SET value = '19' WHERE name = 'schema-patch-level';
