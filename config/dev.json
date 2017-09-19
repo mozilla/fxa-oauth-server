@@ -3,6 +3,10 @@
     "issuer": "127.0.0.1:9000",
     "verificationUrl": "http://127.0.0.1:5050/v2"
   },
+  "events": {
+    "region": "local",
+    "queueUrl": "http://localhost:4100/queue/local-queue3"
+  },
   "contentUrl": "http://127.0.0.1:3030/oauth/",
   "clients": [
     {
