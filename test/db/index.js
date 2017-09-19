@@ -470,7 +470,7 @@ describe('db', function() {
       });
     });
 
-    it('does not revokesTokens for not canGrant or not publicClient', () => {
+    it('does not revoke tokens for not canGrant or not publicClient', () => {
       return testRemovalWithClient({
         canGrant: false,
         publicClient: false
