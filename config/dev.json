@@ -43,7 +43,21 @@
       "termsUri": "",
       "privacyUri": "",
       "trusted": true,
-      "publicClient": true
+      "publicClient": true,
+      "applicationScope": "https://identity.mozilla.org/apps/notes"
+    },
+    {
+      "id": "ddd334467337344a",
+      "name": "Scoped Key WebExtension",
+      "hashedSecret": "ac287a384b269492655ccd61fcadffe4d40d4d5d648209f96ee955d45f0ca05c",
+      "redirectUri": "https://cad3e32c651f62062e87b786f04c49bea007c8c3.extensions.allizom.org",
+      "imageUri": "",
+      "canGrant": false,
+      "termsUri": "",
+      "privacyUri": "",
+      "trusted": true,
+      "publicClient": true,
+      "applicationScope": "https://identity.mozilla.org/apps/scoped-example"
     },
     {
       "id": "98e6508e88680e1a",
@@ -107,6 +121,18 @@
       "redirectUri": "urn:ietf:wg:oauth:2.0:oob",
       "trusted": true,
       "canGrant": true
+    }
+  ],
+  "applicationScopes": [
+    {
+      "applicationScope": "https://identity.mozilla.org/apps/notes",
+      "salt": "289a885946ee316844d9ffd0d725ee714901548a1e6507f1a40fb3c2ae0c99f1",
+      "description": "Read and write access to Notes"
+    },
+    {
+      "applicationScope": "https://identity.mozilla.org/apps/scoped-example",
+      "salt": "c929286b3e8a0dadf5d8915fd0b44b9a2473aef07ee48becceb7b9b0d6e53a4d",
+      "description": "Read and write access to scoped key examples"
     }
   ],
   "localRedirects": true,
