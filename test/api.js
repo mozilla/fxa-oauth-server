@@ -780,6 +780,53 @@ describe('/v1', function() {
       });
     });
 
+    describe('?keys_jwe', function() {
+      it('should return the key bundle in PKCE flow', function() {
+        const keys_jwe = 'BUNDLE_HERE';
+        const code_verifier = 'ywZ_yiNpe-UoGYW.oW95hTjRZ8j_d2kF';
+        const code_challenge = 'iyW5ScKr22v_QL-rcW_EGlJrDSOymJvrlXlw4j7JBiQ';
+        const secret2 = unique.secret();
+        const client2 = {
+          name: 'client2Public',
+          hashedSecret: encrypt.hash(secret2),
+          redirectUri: 'https://example.domain',
+          imageUri: 'https://example.foo.domain/logo.png',
+          trusted: true,
+          publicClient: true
+        };
+        return db.registerClient(client2).then(() => {
+          mockAssertion().reply(200, VERIFY_GOOD);
+          return Server.api.post({
+            url: '/authorization',
+            payload: authParams({
+              client_id: client2.id.toString('hex'),
+              response_type: 'code',
+              code_challenge_method: 'S256',
+              code_challenge: code_challenge,
+              keys_jwe: keys_jwe
+            })
+          }).then((res) => {
+            assert.equal(res.statusCode, 200);
+            return url.parse(res.result.redirect, true).query.code;
+          });
+        }).then((code) => {
+          return Server.api.post({
+            url: '/token',
+            payload: {
+              client_id: client2.id.toString('hex'),
+              code: code,
+              code_verifier: code_verifier
+            }
+          });
+        }).then((res) => {
+          assert.equal(res.statusCode, 200);
+          assert.equal(res.result.keys_jwe, keys_jwe);
+        });
+
+      });
+    });
+
+
     describe('response', function() {
       describe('with a trusted client', function() {
         it('should redirect to the redirect_uri', function() {
