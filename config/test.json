@@ -91,14 +91,12 @@
   "scopes": [
     {
       "scope": "https://identity.mozilla.org/apps/sample-scope",
-      "epochAccessKey": "02a43cc9c0a8b08b5d588d254d35a5de499124c7e7d966509ff2372e8710a241",
       "description": "Do test things",
       "canGrantScopedKeys": false,
       "createdAt": 1506382543621
     },
     {
       "scope": "https://identity.mozilla.org/apps/sample-scope-can-scope-key",
-      "epochAccessKey": "1ae64d77dfe4c6f194d01405b2ad94b95352885b69e7f1a4a0a9bd6ea84e13eb",
       "description": "Do test things with scoped keys",
       "canGrantScopedKeys": true,
       "createdAt": 1506383064641
