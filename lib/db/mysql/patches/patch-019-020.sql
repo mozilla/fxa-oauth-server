@@ -7,6 +7,6 @@ CREATE TABLE scopes (
   description VARCHAR(255) NOT NULL,
   canGrantScopedKeys BOOLEAN NOT NULL DEFAULT FALSE,
   createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB
+) ENGINE=InnoDB;
 
 UPDATE dbMetadata SET value = '20' WHERE name = 'schema-patch-level';

@@ -53,9 +53,9 @@
       "imageUri": "https://mozorg.cdn.mozilla.net/media/img/firefox/new/header-firefox.png",
       "redirectUri": "https://example.domain/return?foo=bar",
       "trusted": true,
+      "allowedScopes": "kv",
       "canGrant": false,
       "publicClient": true,
-      "scopes": "kv"
     },
     {
       "id": "aaa6b9b3a65a1871",
@@ -64,9 +64,9 @@
       "imageUri": "https://mozorg.cdn.mozilla.net/media/img/firefox/new/header-firefox.png",
       "redirectUri": "https://example.domain/return?foo=bar",
       "trusted": true,
+      "allowedScopes": "https://identity.mozilla.org/apps/sample-scope-can-scope-key https://identity.mozilla.org/apps/sample-scope kv",
       "canGrant": false,
-      "publicClient": false,
-      "scopes": "https://identity.mozilla.org/apps/sample-scope-can-scope-key https://identity.mozilla.org/apps/sample-scope kv"
+      "publicClient": false
     }
   ],
   "logging": {
