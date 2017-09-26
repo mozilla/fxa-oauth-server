@@ -123,8 +123,7 @@
     {
       "scope": "https://identity.mozilla.org/apps/notes",
       "description": "Read and write Notes data",
-      "canGrantScopedKeys": true,
-      "createdAt": 1506382543621
+      "canGrantScopedKeys": true
     }
   ]
 }
