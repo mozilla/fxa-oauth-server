@@ -1,5 +1,13 @@
 ALTER TABLE clients
-ADD COLUMN scopes VARCHAR(1024) AFTER trusted,
+ADD COLUMN allowedScopes VARCHAR(1024) AFTER trusted,
 ALGORITHM = INPLACE, LOCK = NONE;
+
+CREATE TABLE scopes (
+  scope VARCHAR(128) NOT NULL PRIMARY KEY,
+  epochAccessKey BINARY(32) NOT NULL,
+  description VARCHAR(255) NOT NULL,
+  canGrantScopedKeys BOOLEAN NOT NULL DEFAULT FALSE,
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB
 
 UPDATE dbMetadata SET value = '20' WHERE name = 'schema-patch-level';

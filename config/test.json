@@ -54,7 +54,19 @@
       "redirectUri": "https://example.domain/return?foo=bar",
       "trusted": true,
       "canGrant": false,
-      "publicClient": true
+      "publicClient": true,
+      "scopes": "kv"
+    },
+    {
+      "id": "aaa6b9b3a65a1871",
+      "hashedSecret": "289a885946ee316844d9ffd0d725ee714901548a1e6507f1a40fb3c2ae0c99f1",
+      "name": "Scoped Key Client",
+      "imageUri": "https://mozorg.cdn.mozilla.net/media/img/firefox/new/header-firefox.png",
+      "redirectUri": "https://example.domain/return?foo=bar",
+      "trusted": true,
+      "canGrant": false,
+      "publicClient": false,
+      "scopes": "https://identity.mozilla.org/apps/sample-scope-can-scope-key https://identity.mozilla.org/apps/sample-scope kv"
     }
   ],
   "logging": {
@@ -75,5 +87,21 @@
       "jku": "http://127.0.0.1:9019/.well-known/public-keys"
     }
   ],
-  "allowHttpRedirects": true
+  "allowHttpRedirects": true,
+  "scopes": [
+    {
+      "scope": "https://identity.mozilla.org/apps/sample-scope",
+      "epochAccessKey": "02a43cc9c0a8b08b5d588d254d35a5de499124c7e7d966509ff2372e8710a241",
+      "description": "Do test things",
+      "canGrantScopedKeys": false,
+      "createdAt": 1506382543621
+    },
+    {
+      "scope": "https://identity.mozilla.org/apps/sample-scope-can-scope-key",
+      "epochAccessKey": "1ae64d77dfe4c6f194d01405b2ad94b95352885b69e7f1a4a0a9bd6ea84e13eb",
+      "description": "Do test things with scoped keys",
+      "canGrantScopedKeys": true,
+      "createdAt": 1506383064641
+    }
+  ]
 }

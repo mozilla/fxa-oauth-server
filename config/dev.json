@@ -118,5 +118,14 @@
     "keyFile": "../config/key.json",
     "key": {}
   },
-  "allowHttpRedirects": true
+  "allowHttpRedirects": true,
+  "scopes": [
+    {
+      "scope": "https://identity.mozilla.org/apps/notes",
+      "epochAccessKey": "1ae64d77dfe4c6f194d01405b2ad94b95352885b69e7f1a4a0a9bd6ea84e13eb",
+      "description": "Read and write Notes data",
+      "canGrantScopedKeys": true,
+      "createdAt": 1506382543621
+    }
+  ]
 }

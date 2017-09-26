@@ -27,7 +27,8 @@ const VERIFY_GOOD = JSON.stringify({
   issuer: config.get('browserid.issuer'),
   idpClaims: {
     'fxa-verifiedEmail': VEMAIL,
-    'fxa-lastAuthAt': 123456
+    'fxa-lastAuthAt': 123456,
+    'fxa-generation': 123456
   }
 });
 
@@ -1790,19 +1791,84 @@ describe('/v1', function() {
       });
 
       describe('GET /client/:id/key-data', function() {
-        describe('response', function() {
-          it('should support the client id path', function() {
-            return Server.internal.api.post('/client/' + clientId + '/key-data')
-              .then(function(res) {
-                console.log(res);
-                assert.equal(res.statusCode, 200);
-                assertSecurityHeaders(res);
-                var body = res.result;
-                assert.equal(body.name, client.name);
-                assert(body.image_uri);
-                assert(body.redirect_uri);
-              });
+        const SCOPED_CLIENT_ID = 'aaa6b9b3a65a1871';
+        const NO_KEY_SCOPES_CLIENT_ID = '38a6b9b3a65a1871';
+        const BAD_CLIENT_ID = '0006b9b3a65a1871';
+        let genericRequest;
+
+        beforeEach(function () {
+          genericRequest = {
+            url: `/client/${SCOPED_CLIENT_ID}/key-data`,
+            payload: {
+              assertion: AN_ASSERTION,
+              scope: 'https://identity.mozilla.org/apps/sample-scope-can-scope-key'
+            }
+          };
+        });
+
+        it('works with a correct response', () => {
+          mockAssertion().reply(200, VERIFY_GOOD);
+          return Server.api.post(genericRequest)
+          .then((res) => {
+            assert.equal(res.statusCode, 200);
+            assertSecurityHeaders(res);
+            const body = res.result;
+
+            assert.equal(body.identifier, 'https://identity.mozilla.org/apps/sample-scope-can-scope-key');
+            assert.equal(body.epochAccessKey, '1ae64d77dfe4c6f194d01405b2ad94b95352885b69e7f1a4a0a9bd6ea84e13eb');
+            assert.equal(body.description, 'Do test things with scoped keys');
+            assert.equal(body.timestamp, 123456);
           });
+        });
+
+        it('fails with non-existent client_id', () => {
+          genericRequest.url = `/client/${BAD_CLIENT_ID}/key-data`;
+          mockAssertion().reply(200, VERIFY_GOOD);
+          return Server.api.post(genericRequest)
+            .then((res) => {
+              assert.equal(res.statusCode, 400);
+              assertSecurityHeaders(res);
+              const body = res.result;
+              assert.equal(body.errno, 114);
+              assert.equal(body.error, 'Invalid scopes');
+            });
+        });
+
+        it('fails with a non-scoped-key scope ', () => {
+          genericRequest.payload.scope = 'https://identity.mozilla.org/apps/sample-scope';
+          mockAssertion().reply(200, VERIFY_GOOD);
+          return Server.api.post(genericRequest)
+            .then((res) => {
+              assert.equal(res.statusCode, 400);
+              assertSecurityHeaders(res);
+              const body = res.result;
+              assert.equal(body.errno, 114);
+              assert.equal(body.error, 'Invalid scopes');
+            });
+        });
+
+        it('fails with bad assertion', () => {
+          return Server.api.post(genericRequest)
+            .then((res) => {
+              assert.equal(res.statusCode, 401);
+              assertSecurityHeaders(res);
+              const body = res.result;
+              assert.equal(body.message, 'Invalid assertion');
+            });
+        });
+
+        it('fails for clients that do not have the scope', () => {
+          genericRequest.url = `/client/${NO_KEY_SCOPES_CLIENT_ID}/key-data`;
+
+          mockAssertion().reply(200, VERIFY_GOOD);
+          return Server.api.post(genericRequest)
+            .then((res) => {
+              assert.equal(res.statusCode, 400);
+              assertSecurityHeaders(res);
+              const body = res.result;
+              assert.equal(body.errno, 114);
+              assert.equal(body.error, 'Invalid scopes');
+            });
         });
       });
 
