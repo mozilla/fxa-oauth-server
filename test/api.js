@@ -1815,7 +1815,7 @@ describe('/v1', function() {
             const body = res.result;
 
             assert.equal(body.identifier, 'https://identity.mozilla.org/apps/sample-scope-can-scope-key');
-            assert.equal(body.epochAccessKey, '0000000000000000000000000000000000000000000000000000000000000000');
+            assert.equal(body.keyMaterial, '0000000000000000000000000000000000000000000000000000000000000000');
             assert.equal(body.timestamp, 123456);
           });
         });
