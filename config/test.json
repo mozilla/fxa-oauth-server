@@ -91,11 +91,11 @@
   "scopes": [
     {
       "scope": "https://identity.mozilla.org/apps/sample-scope",
-      "canGrantScopedKeys": false
+      "hasScopedKeys": false
     },
     {
       "scope": "https://identity.mozilla.org/apps/sample-scope-can-scope-key",
-      "canGrantScopedKeys": true
+      "hasScopedKeys": true
     }
   ]
 }

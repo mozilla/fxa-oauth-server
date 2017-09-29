@@ -4,7 +4,7 @@ ALGORITHM = INPLACE, LOCK = NONE;
 
 CREATE TABLE scopes (
   scope VARCHAR(128) NOT NULL PRIMARY KEY,
-  canGrantScopedKeys BOOLEAN NOT NULL DEFAULT FALSE
+  hasScopedKeys BOOLEAN NOT NULL DEFAULT FALSE
 ) ENGINE=InnoDB;
 
 UPDATE dbMetadata SET value = '20' WHERE name = 'schema-patch-level';
