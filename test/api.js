@@ -1816,7 +1816,6 @@ describe('/v1', function() {
 
             assert.equal(body.identifier, 'https://identity.mozilla.org/apps/sample-scope-can-scope-key');
             assert.equal(body.epochAccessKey, '0000000000000000000000000000000000000000000000000000000000000000');
-            assert.equal(body.description, 'Do test things with scoped keys');
             assert.equal(body.timestamp, 123456);
           });
         });

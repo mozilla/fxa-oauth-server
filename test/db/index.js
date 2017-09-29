@@ -572,7 +572,6 @@ describe('db', function() {
       const scopeName = 'https://some-scope.mozilla.org';
       const newScope = {
         scope: scopeName,
-        description: 'Some new scope',
         canGrantScopedKeys: true
       };
       return db.registerScope(newScope)

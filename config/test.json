@@ -91,12 +91,10 @@
   "scopes": [
     {
       "scope": "https://identity.mozilla.org/apps/sample-scope",
-      "description": "Do test things",
       "canGrantScopedKeys": false
     },
     {
       "scope": "https://identity.mozilla.org/apps/sample-scope-can-scope-key",
-      "description": "Do test things with scoped keys",
       "canGrantScopedKeys": true
     }
   ]

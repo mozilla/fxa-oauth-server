@@ -122,7 +122,6 @@
   "scopes": [
     {
       "scope": "https://identity.mozilla.org/apps/notes",
-      "description": "Read and write Notes data",
       "canGrantScopedKeys": true
     }
   ]
