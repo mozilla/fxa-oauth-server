@@ -1790,87 +1790,6 @@ describe('/v1', function() {
         });
       });
 
-      describe('GET /client/:id/key-data', function() {
-        const SCOPED_CLIENT_ID = 'aaa6b9b3a65a1871';
-        const NO_KEY_SCOPES_CLIENT_ID = '38a6b9b3a65a1871';
-        const BAD_CLIENT_ID = '0006b9b3a65a1871';
-        let genericRequest;
-
-        beforeEach(function () {
-          genericRequest = {
-            url: `/client/${SCOPED_CLIENT_ID}/key-data`,
-            payload: {
-              assertion: AN_ASSERTION,
-              scope: 'https://identity.mozilla.org/apps/sample-scope-can-scope-key'
-            }
-          };
-        });
-
-        it('works with a correct response', () => {
-          mockAssertion().reply(200, VERIFY_GOOD);
-          return Server.api.post(genericRequest)
-          .then((res) => {
-            assert.equal(res.statusCode, 200);
-            assertSecurityHeaders(res);
-            const body = res.result;
-
-            assert.equal(body.identifier, 'https://identity.mozilla.org/apps/sample-scope-can-scope-key');
-            assert.equal(body.keyMaterial, '0000000000000000000000000000000000000000000000000000000000000000');
-            assert.equal(body.timestamp, 123456);
-          });
-        });
-
-        it('fails with non-existent client_id', () => {
-          genericRequest.url = `/client/${BAD_CLIENT_ID}/key-data`;
-          mockAssertion().reply(200, VERIFY_GOOD);
-          return Server.api.post(genericRequest)
-            .then((res) => {
-              assert.equal(res.statusCode, 400);
-              assertSecurityHeaders(res);
-              const body = res.result;
-              assert.equal(body.errno, 114);
-              assert.equal(body.error, 'Invalid scopes');
-            });
-        });
-
-        it('fails with a non-scoped-key scope ', () => {
-          genericRequest.payload.scope = 'https://identity.mozilla.org/apps/sample-scope';
-          mockAssertion().reply(200, VERIFY_GOOD);
-          return Server.api.post(genericRequest)
-            .then((res) => {
-              assert.equal(res.statusCode, 400);
-              assertSecurityHeaders(res);
-              const body = res.result;
-              assert.equal(body.errno, 114);
-              assert.equal(body.error, 'Invalid scopes');
-            });
-        });
-
-        it('fails with bad assertion', () => {
-          return Server.api.post(genericRequest)
-            .then((res) => {
-              assert.equal(res.statusCode, 401);
-              assertSecurityHeaders(res);
-              const body = res.result;
-              assert.equal(body.message, 'Invalid assertion');
-            });
-        });
-
-        it('fails for clients that do not have the scope', () => {
-          genericRequest.url = `/client/${NO_KEY_SCOPES_CLIENT_ID}/key-data`;
-
-          mockAssertion().reply(200, VERIFY_GOOD);
-          return Server.api.post(genericRequest)
-            .then((res) => {
-              assert.equal(res.statusCode, 400);
-              assertSecurityHeaders(res);
-              const body = res.result;
-              assert.equal(body.errno, 114);
-              assert.equal(body.error, 'Invalid scopes');
-            });
-        });
-      });
-
       describe('GET /clients', function() {
         it('should require authorization', function() {
           return Server.internal.api.get({
@@ -2294,6 +2213,87 @@ describe('/v1', function() {
             assertSecurityHeaders(res);
           });
         });
+      });
+    });
+
+    describe('GET /client/key-data/:id', function() {
+      const SCOPED_CLIENT_ID = 'aaa6b9b3a65a1871';
+      const NO_KEY_SCOPES_CLIENT_ID = '38a6b9b3a65a1871';
+      const BAD_CLIENT_ID = '0006b9b3a65a1871';
+      let genericRequest;
+
+      beforeEach(function () {
+        genericRequest = {
+          url: `/client/key-data/${SCOPED_CLIENT_ID}`,
+          payload: {
+            assertion: AN_ASSERTION,
+            scope: 'https://identity.mozilla.org/apps/sample-scope-can-scope-key'
+          }
+        };
+      });
+
+      it('works with a correct response', () => {
+        mockAssertion().reply(200, VERIFY_GOOD);
+        return Server.api.post(genericRequest)
+          .then((res) => {
+            assert.equal(res.statusCode, 200);
+            assertSecurityHeaders(res);
+            const body = res.result;
+
+            assert.equal(body.identifier, 'https://identity.mozilla.org/apps/sample-scope-can-scope-key');
+            assert.equal(body.keyMaterial, '0000000000000000000000000000000000000000000000000000000000000000');
+            assert.equal(body.timestamp, 123456);
+          });
+      });
+
+      it('fails with non-existent client_id', () => {
+        genericRequest.url = `/client/key-data/${BAD_CLIENT_ID}`;
+        mockAssertion().reply(200, VERIFY_GOOD);
+        return Server.api.post(genericRequest)
+          .then((res) => {
+            assert.equal(res.statusCode, 400);
+            assertSecurityHeaders(res);
+            const body = res.result;
+            assert.equal(body.errno, 114);
+            assert.equal(body.error, 'Invalid scopes');
+          });
+      });
+
+      it('fails with a non-scoped-key scope ', () => {
+        genericRequest.payload.scope = 'https://identity.mozilla.org/apps/sample-scope';
+        mockAssertion().reply(200, VERIFY_GOOD);
+        return Server.api.post(genericRequest)
+          .then((res) => {
+            assert.equal(res.statusCode, 400);
+            assertSecurityHeaders(res);
+            const body = res.result;
+            assert.equal(body.errno, 114);
+            assert.equal(body.error, 'Invalid scopes');
+          });
+      });
+
+      it('fails with bad assertion', () => {
+        return Server.api.post(genericRequest)
+          .then((res) => {
+            assert.equal(res.statusCode, 401);
+            assertSecurityHeaders(res);
+            const body = res.result;
+            assert.equal(body.message, 'Invalid assertion');
+          });
+      });
+
+      it('fails for clients that do not have the scope', () => {
+        genericRequest.url = `/client/key-data/${NO_KEY_SCOPES_CLIENT_ID}`;
+
+        mockAssertion().reply(200, VERIFY_GOOD);
+        return Server.api.post(genericRequest)
+          .then((res) => {
+            assert.equal(res.statusCode, 400);
+            assertSecurityHeaders(res);
+            const body = res.result;
+            assert.equal(body.errno, 114);
+            assert.equal(body.error, 'Invalid scopes');
+          });
       });
     });
 
