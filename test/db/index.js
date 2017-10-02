@@ -575,21 +575,11 @@ describe('db', function() {
         hasScopedKeys: true
       };
       return db.registerScope(newScope)
-        .then(
-          function() {
-            return db.getScope(scopeName);
-          },
-          function(err) {
-            assert.fail(err);
-          }
-        ).then(
-          function(result) {
-            assert.deepEqual(newScope, result);
-          },
-          function(err) {
-            assert.fail(err);
-          }
-        );
+        .then(() => {
+          return db.getScope(scopeName);
+        }).then((result) => {
+          assert.deepEqual(newScope, result);
+        });
     });
 
   });
