@@ -565,9 +565,7 @@ describe('db', function() {
     });
   });
 
-
   describe('scopes', function () {
-
     it('can register and fetch scopes', () => {
       const scopeName = 'https://some-scope.mozilla.org/apps/' + Math.random();
       const notFoundScope = 'https://some-scope-404.mozilla.org';
@@ -586,7 +584,6 @@ describe('db', function() {
           assert.deepEqual(newScope, result);
         });
     });
-
   });
 
   describe('client-tokens', function () {
