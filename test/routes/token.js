@@ -23,13 +23,7 @@ function joiNotAllowed(err, param) {
   assert.equal(err.details[0].message, `"${param}" is not allowed`);
 }
 
-function joiRegexMismatch(err, param, value, pattern) {
-  assert.ok(err.isJoi);
-  assert.ok(err.name, 'ValidationError');
-  assert.equal(err.details[0].message, `"${param}" with value "${value}" fails to match the required pattern: ${pattern}`);
-}
-
-describe.only('/token POST', function () {
+describe('/token POST', function () {
   // route validation function
   function v(req, cb) {
     route.validate.payload(req, {}, cb);
@@ -85,7 +79,9 @@ describe.only('/token POST', function () {
         code_verifier: bad_code_verifier,
         code: CODE
       }, (err) => {
-        joiRegexMismatch(err, 'code_verifier', bad_code_verifier, '/^[A-Za-z0-9-_]{43,128}$/');
+        assert.ok(err.isJoi);
+        assert.ok(err.name, 'ValidationError');
+        assert.equal(err.details[0].message, `"code_verifier" length must be at least 43 characters long`); // eslint-disable-line quotes
         done();
       });
     });
@@ -97,7 +93,9 @@ describe.only('/token POST', function () {
         code_verifier: bad_code_verifier,
         code: CODE
       }, (err) => {
-        joiRegexMismatch(err, 'code_verifier', bad_code_verifier, '/^[A-Za-z0-9-_]{43,128}$/');
+        assert.ok(err.isJoi);
+        assert.ok(err.name, 'ValidationError');
+        assert.equal(err.details[0].message, `"code_verifier" length must be less than or equal to 128 characters long`);  // eslint-disable-line quotes
         done();
       });
     });
@@ -109,7 +107,9 @@ describe.only('/token POST', function () {
         code_verifier: bad_code_verifier,
         code: CODE
       }, (err) => {
-        joiRegexMismatch(err, 'code_verifier', bad_code_verifier, '/^[A-Za-z0-9-_]{43,128}$/');
+        assert.ok(err.isJoi);
+        assert.ok(err.name, 'ValidationError');
+        assert.equal(err.details[0].message, `"code_verifier" with value "${bad_code_verifier}" fails to match the required pattern: /^[A-Za-z0-9-_]+$/`);
         done();
       });
     });
