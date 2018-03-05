@@ -32,7 +32,11 @@ env:
   - CXX=g++-4.8 NODE_ENV=test DB=mysql
 
 before_install:
+  - npm i -g npm@5
   - npm config set spin false
+
+install:
+  - npm ci 
 
 before_script:
   - "mysql -u root -NBe 'select version()'"

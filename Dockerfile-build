@@ -17,6 +17,7 @@ COPY npm-shrinkwrap.json npm-shrinkwrap.json
 COPY package.json package.json
 COPY scripts/gen_keys.js scripts/gen_keys.js
 
-RUN npm install --production && rm -rf ~app/.npm /tmp/*
+RUN npm i -g npm@5
+RUN npm ci && rm -rf ~app/.npm /tmp/*
 
 COPY . /app
