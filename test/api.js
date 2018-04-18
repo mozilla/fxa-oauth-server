@@ -2768,7 +2768,7 @@ describe('/v1', function() {
       });
     });
 
-    it('fails for payload having email:false', function() {
+    it('should not return email for payload having email:false', function() {
       return newToken({ scope: 'profile:email' }).then(function(res) {
         assert.equal(res.statusCode, 200);
         assertSecurityHeaders(res);
@@ -2780,13 +2780,13 @@ describe('/v1', function() {
           }
         });
       }).then(function(res) {
-        assert.equal(res.statusCode, 400);
+        assert.equal(res.statusCode, 200);
         assertSecurityHeaders(res);
         assert.equal(res.result.email, undefined);
       });
     });
 
-    it('fails for payload having email:true', function() {
+    it('should not return email for payload having email:true', function() {
       return newToken({ scope: 'profile:email' }).then(function(res) {
         assert.equal(res.statusCode, 200);
         assertSecurityHeaders(res);
@@ -2798,7 +2798,7 @@ describe('/v1', function() {
           }
         });
       }).then(function(res) {
-        assert.equal(res.statusCode, 400);
+        assert.equal(res.statusCode, 200);
         assertSecurityHeaders(res);
         assert.equal(res.result.email, undefined);
       });
