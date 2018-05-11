@@ -55,7 +55,7 @@ jobs:
             fi
 
             if [ -n "${DOCKER_TAG}" ]; then
-              docker login -e "$DOCKER_EMAIL" -u "$DOCKER_USER" -p "$DOCKER_PASS"
+              docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
               echo ${DOCKERHUB_REPO}:${DOCKER_TAG}
               docker tag fxa-oauth-server:build ${DOCKERHUB_REPO}:${DOCKER_TAG}
               docker images
