@@ -12,6 +12,7 @@ jobs:
       - image: circleci/node
     steps:
       - checkout
+      - setup_remote_docker
 
       - run:
           name: Create version.json
