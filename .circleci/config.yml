@@ -41,7 +41,7 @@ jobs:
 
       - run:
           name: Push to Dockerhub
-          command: >
+          command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
               DOCKER_TAG="latest"
             fi
@@ -55,6 +55,7 @@ jobs:
             fi
 
             if [ -n "${DOCKER_TAG}" ]; then
+              docker login -e "$DOCKER_EMAIL" -u "$DOCKER_USER" -p "$DOCKER_PASS"
               echo ${DOCKERHUB_REPO}:${DOCKER_TAG}
               docker tag fxa-oauth-server:build ${DOCKERHUB_REPO}:${DOCKER_TAG}
               docker images
