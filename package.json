@@ -33,7 +33,7 @@
     "fxa-shared": "1.0.5",
     "hapi": "17.5.1",
     "hapi-hpkp": "git+https://github.com/deeptibaghel/hapi-hpkp.git#hapi",
-    "joi": "^10.0.1",
+    "joi": "13.3.0",
     "keypair": "^1.0.1",
     "mozlog": "^2.0.3",
     "mysql": "^2.5.5",
