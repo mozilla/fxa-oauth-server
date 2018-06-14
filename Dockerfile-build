@@ -2,7 +2,7 @@ FROM node:8-alpine
 
 RUN npm install -g npm@6 && rm -rf ~app/.npm /tmp/*
 
-RUN apk add --no-cache git
+RUN apk add --no-cache git make gcc g++ linux-headers openssl python
 
 RUN addgroup -g 10001 app && \
     adduser -D -G app -h /app -u 10001 app
@@ -22,3 +22,7 @@ COPY scripts/gen_keys.js scripts/gen_keys.js
 RUN npm install --production && rm -rf ~app/.npm /tmp/*
 
 COPY . /app
+
+USER root
+
+RUN apk del make gcc g++ linux-headers openssl python
