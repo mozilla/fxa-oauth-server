@@ -79,6 +79,11 @@ const NO_KEY_SCOPES_CLIENT_ID = '38a6b9b3a65a1871';
 const BAD_CLIENT_ID = '0006b9b3a65a1871';
 const SCOPE_CAN_SCOPE_KEY = 'https://identity.mozilla.com/apps/sample-scope-can-scope-key';
 
+function delay(time) {
+  return new Promise ( function ( fulfill ) {
+    setTimeout( fulfill, time )
+  })
+}
 
 function mockAssertion() {
   var parts = url.parse(config.get('browserid.verificationUrl'));
@@ -1352,32 +1357,54 @@ describe('/v1', function() {
 
         });
 
-        it('must not have expired', function() {
+        it('must not have expired', async function() {
           this.slow(200);
           var exp = config.get('expiration.code');
           config.set('expiration.code', 50);
           mockAssertion().reply(200, VERIFY_GOOD);
-          return Server.api.post({
+          let res = await Server.api.post({
             url: '/authorization',
             payload: authParams()
-          }).then(function(res) {
-            return res.result.code;
-          }).delay(60).then(function(code) {
-            return Server.api.post({
-              url: '/token',
-              payload: {
-                client_id: clientId,
-                client_secret: secret,
-                code: code
-              }
-            });
-          }).then(function(res) {
-            assert.equal(res.result.code, 400);
-            assert.equal(res.result.message, 'Expired code');
-            assertSecurityHeaders(res);
-          }).finally(function() {
-            config.set('expiration.code', exp);
+          })
+
+          await delay(60);
+
+          const code = res.result.code;
+          res = await Server.api.post({
+            url: '/token',
+            payload: {
+              client_id: clientId,
+              client_secret: secret,
+              code: code
+            }
           });
+
+          assert.equal(res.result.code, 400);
+          assert.equal(res.result.message, 'Expired code');
+          assertSecurityHeaders(res);
+
+          config.set('expiration.code', exp);
+          // return Server.api.post({
+          //   url: '/authorization',
+          //   payload: authParams()
+          // }).then(function(res) {
+          //   return res.result.code;
+          // }).delay(60).then(function(code) {
+          //   return Server.api.post({
+          //     url: '/token',
+          //     payload: {
+          //       client_id: clientId,
+          //       client_secret: secret,
+          //       code: code
+          //     }
+          //   });
+          // }).then(function(res) {
+          //   assert.equal(res.result.code, 400);
+          //   assert.equal(res.result.message, 'Expired code');
+          //   assertSecurityHeaders(res);
+          // }).finally(function() {
+          //   config.set('expiration.code', exp);
+          // });
         });
 
         it('cannot use the same code multiple times', function() {
