@@ -24,7 +24,7 @@
     "node": ">=8"
   },
   "dependencies": {
-    "bluebird": "^2.9.14",
+    "bluebird": "^3.5.1",
     "buf": "0.1.0",
     "commander": "^2.9.0",
     "convict": "4.0.2",
