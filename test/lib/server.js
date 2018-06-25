@@ -10,9 +10,7 @@ const version = require('../../lib/config').get('api.version');
 function wrapServer(server) {
   var wrap = {};
   function request(options) {
-    var deferred = P.defer();
-    server.inject(options, deferred.resolve.bind(deferred));
-    return deferred.promise;
+     return server.inject(options);
   }
 
   function opts(options) {
