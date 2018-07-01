@@ -55,7 +55,7 @@ const deleteBatchSize = Number(program.deleteBatchSize) || 200; // Default 200
 // There may be more than one pocketId, so treat this as a comma-separated list.
 const ignorePocketClientId = program.pocketId.split(/\s*,\s*/g);
 
-db.ping().done(function() {
+db.ping().done(() => {
   // Only mysql impl supports token deletion at the moment
   if (db.purgeExpiredTokens) {
     logger.info('deleting', {
@@ -71,25 +71,25 @@ db.ping().done(function() {
                                  delaySeconds,
                                  ignorePocketClientId,
                                  deleteBatchSize)
-      .then(function () {
+      .then(() => {
         logger.info('completed');
         process.exit(0);
       })
-      .catch(function (err) {
+      .catch((err) => {
         logger.error('error', err);
         process.exit(1);
       });
   } else {
-    var message = 'Unable to purge expired tokens, only available ' +
-      'when using config with mysql database.';
+    const message = ('Unable to purge expired tokens, only available ' +
+                     'when using config with mysql database.');
     logger.info('skipping', { message: message });
   }
-}, function(err) {
+}, (err) => {
   logger.critical('db.ping', err);
   process.exit(1);
 });
 
-process.on('uncaughtException', function (err) {
+process.on('uncaughtException', (err) => {
   logger.error('error', err);
   process.exit(2);
 });
