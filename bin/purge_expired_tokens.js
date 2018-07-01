@@ -30,11 +30,10 @@ program
   .version(package.version)
   .option('-c, --config [config]', 'Configuration to use. Ex. dev')
   .option('-p, --pocket-id <pocketId>', 'Pocket Client Ids. These tokens will not be purged. (CSV)')
-  .option('-t, --token-count <tokenCount>', 'Number of tokens to delete.')
+  .option('-t, --token-count <tokenCount>', 'Total number of tokens to delete.')
   .option('-d, --delay-seconds <delaySeconds>', 'Delay (seconds) between each deletion round. (Default: 1 second)')
+  .option('-D, --delete-batch-size <deleteBatchSize>', 'Number of tokens to delete in each deletion round. (Default: 200)')
   .parse(process.argv);
-
-program.parse(process.argv);
 
 if (! program.config) {
   program.config = 'dev';
@@ -52,6 +51,7 @@ if (! program.pocketId) {
 
 const numberOfTokens = parseInt(program.tokenCount) || 200;
 const delaySeconds = Number(program.delaySeconds) || 1; // Default 1 seconds
+const deleteBatchSize = Number(program.deleteBatchSize) || 200; // Default 200
 // There may be more than one pocketId, so treat this as a comma-separated list.
 const ignorePocketClientId = program.pocketId.split(/\s*,\s*/g);
 
@@ -61,12 +61,16 @@ db.ping().done(function() {
     logger.info('deleting', {
       numberOfTokens: numberOfTokens,
       delaySeconds: delaySeconds,
+      deleteBatchSize: deleteBatchSize,
       ignorePocketClientId: ignorePocketClientId
     });
 
     // To reduce the risk of deleting pocket tokens, ensure that the pocket-id
     // passed in belongs to a client.
-    return db.purgeExpiredTokens(numberOfTokens, delaySeconds, ignorePocketClientId)
+    return db.purgeExpiredTokens(numberOfTokens,
+                                 delaySeconds,
+                                 ignorePocketClientId,
+                                 deleteBatchSize)
       .then(function () {
         logger.info('completed');
         process.exit(0);
