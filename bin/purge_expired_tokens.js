@@ -57,33 +57,34 @@ const ignorePocketClientId = program.pocketId.split(/\s*,\s*/g);
 
 db.ping().done(() => {
   // Only mysql impl supports token deletion at the moment
-  if (db.purgeExpiredTokens) {
-    logger.info('deleting', {
-      numberOfTokens: numberOfTokens,
-      delaySeconds: delaySeconds,
-      deleteBatchSize: deleteBatchSize,
-      ignorePocketClientId: ignorePocketClientId
-    });
-
-    // To reduce the risk of deleting pocket tokens, ensure that the pocket-id
-    // passed in belongs to a client.
-    return db.purgeExpiredTokens(numberOfTokens,
-                                 delaySeconds,
-                                 ignorePocketClientId,
-                                 deleteBatchSize)
-      .then(() => {
-        logger.info('completed');
-        process.exit(0);
-      })
-      .catch((err) => {
-        logger.error('error', err);
-        process.exit(1);
-      });
-  } else {
+  if (! db.purgeExpiredTokens) {
     const message = ('Unable to purge expired tokens, only available ' +
                      'when using config with mysql database.');
     logger.info('skipping', { message: message });
+    return
   }
+
+  logger.info('deleting', {
+    numberOfTokens: numberOfTokens,
+    delaySeconds: delaySeconds,
+    deleteBatchSize: deleteBatchSize,
+    ignorePocketClientId: ignorePocketClientId
+  });
+
+  // To reduce the risk of deleting pocket tokens, ensure that the pocket-id
+  // passed in belongs to a client.
+  return db.purgeExpiredTokens(numberOfTokens,
+                               delaySeconds,
+                               ignorePocketClientId,
+                               deleteBatchSize)
+    .then(() => {
+      logger.info('completed');
+      process.exit(0);
+    })
+    .catch((err) => {
+      logger.error('error', err);
+      process.exit(1);
+    });
 }, (err) => {
   logger.critical('db.ping', err);
   process.exit(1);
