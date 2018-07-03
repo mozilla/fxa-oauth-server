@@ -1498,6 +1498,158 @@ describe('/v1', function() {
         });
       });
 
+      it('incremental authorization with include_granted_scopes', function() {
+        mockAssertion().reply(200, VERIFY_GOOD);
+        return Server.api.post({
+          url: '/authorization',
+          payload: authParams({
+            scope: 'foo bar bar',
+            access_type: 'offline'
+          })
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          assertSecurityHeaders(res);
+          return Server.api.post({
+            url: '/token',
+            payload: {
+              client_id: clientId,
+              client_secret: secret,
+              code: res.result.code,
+            }
+          });
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          assertSecurityHeaders(res);
+          assert.equal(res.result.scope, 'foo bar');
+          mockAssertion().reply(200, VERIFY_GOOD);
+          return Server.api.post({
+            url: '/authorization',
+            payload: authParams({
+              scope: 'oof baz',
+              access_type: 'offline',
+              include_granted_scopes: true
+            })
+          });
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          assertSecurityHeaders(res);
+          return Server.api.post({
+            url: '/token',
+            payload: {
+              client_id: clientId,
+              client_secret: secret,
+              code: res.result.code,
+            }
+          });
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          assertSecurityHeaders(res);
+          assert.ok(res.result.scope.includes('oof baz'));
+          assert.ok(res.result.scope.includes('bar foo'));
+        });
+      });
+
+      it('include_granted_scopes disabled for public clients', function() {
+        var clientId = '9b3a65a138a6b871';
+        var clientSecret = '9abc5a15f270f6ba397896de82bd7844cfb029c40218382d6807abb34ca50104';
+        mockAssertion().reply(200, VERIFY_GOOD);
+        return Server.api.post({
+          url: '/authorization',
+          payload: authParams({
+            scope: 'foo bar bar',
+            access_type: 'offline',
+            code_challenge_method: 'S256',
+            code_challenge: 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM'
+          }, {clientId: clientId})
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          assertSecurityHeaders(res);
+          return Server.api.post({
+            url: '/token',
+            payload: {
+              client_id: clientId,
+              client_secret: clientSecret,
+              code: res.result.code,
+            }
+          });
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          assertSecurityHeaders(res);
+          assert.equal(res.result.scope, 'foo bar');
+          mockAssertion().reply(200, VERIFY_GOOD);
+          return Server.api.post({
+            url: '/authorization',
+            payload: authParams({
+              scope: 'oof baz',
+              access_type: 'offline',
+              code_challenge_method: 'S256',
+              code_challenge: 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM',
+              include_granted_scopes: true
+            }, {clientId: clientId})
+          });
+        }).then(function(res) {
+          assert.equal(res.statusCode, 400);
+          assert.equal(res.result.errno, 120);
+        });
+      });
+
+      it('incremental authorization with existing_grant', function() {
+        mockAssertion().reply(200, VERIFY_GOOD);
+        let firstRefreshToken;
+        return Server.api.post({
+          url: '/authorization',
+          payload: authParams({
+            scope: 'bobo bibi',
+            access_type: 'offline'
+          })
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          assertSecurityHeaders(res);
+          return Server.api.post({
+            url: '/token',
+            payload: {
+              client_id: clientId,
+              client_secret: secret,
+              code: res.result.code,
+            }
+          });
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          assertSecurityHeaders(res);
+          firstRefreshToken = res.result.refresh_token;
+          assert.equal(res.result.scope, 'bobo bibi');
+          mockAssertion().reply(200, VERIFY_GOOD);
+          return Server.api.post({
+            url: '/authorization',
+            payload: authParams({
+              scope: 'bubu baba',
+              access_type: 'offline'
+            })
+          });
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          assertSecurityHeaders(res);
+          return Server.api.post({
+            url: '/token',
+            payload: {
+              client_id: clientId,
+              client_secret: secret,
+              code: res.result.code,
+              existing_grant: firstRefreshToken,
+            }
+          });
+        }).then(function(res) {
+          assert.equal(res.statusCode, 200);
+          assertSecurityHeaders(res);
+          assert.ok(res.result.scope.includes('bubu baba'));
+          assert.ok(res.result.scope.includes('bobo bibi'));
+          assert.equal(res.result.auth_at, AUTH_AT);
+          return db.getRefreshToken(encrypt.hash(firstRefreshToken));
+        }).then(function(token) {
+          // Test that the first token is still valid.
+          assert.deepEqual(token.scope, ['bobo', 'bibi']);
+        });
+      });
     });
 
     describe('grant_type=refresh_token', function() {

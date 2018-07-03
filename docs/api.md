@@ -48,6 +48,7 @@ The currently-defined error responses are:
 | 415 | 113 | invalid content type |
 | 400 | 114 | invalid scopes |
 | 400 | 115 | expired token |
+| 400 | 120 | not a confidential client |
 | 500 | 999 | internal server error |
 
 ## API Endpoints
