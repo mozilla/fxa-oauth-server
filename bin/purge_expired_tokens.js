@@ -32,6 +32,7 @@ program
   .option('-p, --pocket-id <pocketId>', 'Pocket Client Ids. These tokens will not be purged. (CSV)')
   .option('-t, --token-count <tokenCount>', 'Total number of tokens to delete.')
   .option('-d, --delay-seconds <delaySeconds>', 'Delay (seconds) between each deletion round. (Default: 1 second)')
+  .option('-I, --by-id', 'Delete tokens by selecting, then deleting by primary id (Default: false)')
   .option('-D, --delete-batch-size <deleteBatchSize>', 'Number of tokens to delete in each deletion round. (Default: 200)')
   .parse(process.argv);
 
@@ -53,7 +54,7 @@ const numberOfTokens = parseInt(program.tokenCount) || 200;
 const delaySeconds = Number(program.delaySeconds) || 1; // Default 1 seconds
 const deleteBatchSize = Number(program.deleteBatchSize) || 200; // Default 200
 // There may be more than one pocketId, so treat this as a comma-separated list.
-const ignorePocketClientId = program.pocketId.split(/\s*,\s*/g);
+const ignorePocketClientId = program.pocketId.toLowerCase().split(/\s*,\s*/g);
 
 db.ping().done(() => {
   // Only mysql impl supports token deletion at the moment
@@ -61,7 +62,7 @@ db.ping().done(() => {
     const message = ('Unable to purge expired tokens, only available ' +
                      'when using config with mysql database.');
     logger.info('skipping', { message: message });
-    return
+    return;
   }
 
   logger.info('deleting', {
@@ -73,10 +74,11 @@ db.ping().done(() => {
 
   // To reduce the risk of deleting pocket tokens, ensure that the pocket-id
   // passed in belongs to a client.
-  return db.purgeExpiredTokens(numberOfTokens,
-                               delaySeconds,
-                               ignorePocketClientId,
-                               deleteBatchSize)
+  const purgeMethod = program.byId ? db.purgeExpiredTokensById : db.purgeExpiredTokens;
+  return purgeMethod(numberOfTokens,
+                     delaySeconds,
+                     ignorePocketClientId,
+                     deleteBatchSize)
     .then(() => {
       logger.info('completed');
       process.exit(0);
