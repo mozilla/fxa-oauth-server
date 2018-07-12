@@ -109,46 +109,47 @@ function makeTests(name, purgeMethod) {
         });
     });
 
-    if (purgeMethod === db.purgeExpiredTokens) {
-      // This next two tests don't fit how db.purgeExpiredTokensById works, so skipping them.
-      it('should call purgeExpiredTokens and ignore client', function() {
-        return purgeMethod(1000, 0, clientIdA, 1000)
-          .then( function () {
-            // Check clientA tokens not deleted
-            return db._read('SELECT COUNT(*) AS count FROM fxa_oauth.tokens WHERE clientId=UNHEX(?);', [
-              clientIdA
-            ]);
-          })
-          .then( function (result) {
-            assert.equal(result[0].count, 1000);
-          })
-          .then( function () {
-            // Check clientB expired tokens are deleted
-            return db._read('SELECT COUNT(*) AS count FROM fxa_oauth.tokens WHERE clientId=UNHEX(?) AND expiresAt < NOW();', [
-              clientIdB
-            ]);
-          })
-          .then( function (result) {
-            assert.equal(result[0].count, 0);
-          })
-          .then( function () {
-            // Check clientB unexpired tokens are not deleted
-            return db._read('SELECT COUNT(*) AS count FROM fxa_oauth.tokens WHERE clientId=UNHEX(?) AND expiresAt > NOW();', [
-              clientIdB
-            ]);
-          })
-          .then( function (result) {
-            assert.equal(result[0].count, 500);
-          })
-          .then( function () {
-            // Check the total tokens
-            return db._read('SELECT COUNT(*) AS count FROM fxa_oauth.tokens;');
-          })
-          .then( function (result) {
-            assert.equal(result[0].count, 1500);
-          });
-      });
+    it('should call purgeExpiredTokens and ignore client', function() {
+      return purgeMethod(1000, 0, clientIdA, 1000)
+        .then( function () {
+          // Check clientA tokens not deleted
+          return db._read('SELECT COUNT(*) AS count FROM fxa_oauth.tokens WHERE clientId=UNHEX(?);', [
+            clientIdA
+          ]);
+        })
+        .then( function (result) {
+          assert.equal(result[0].count, 1000);
+        })
+        .then( function () {
+          // Check clientB expired tokens are deleted
+          return db._read('SELECT COUNT(*) AS count FROM fxa_oauth.tokens WHERE clientId=UNHEX(?) AND expiresAt < NOW();', [
+            clientIdB
+          ]);
+        })
+        .then( function (result) {
+          assert.equal(result[0].count, 0);
+        })
+        .then( function () {
+          // Check clientB unexpired tokens are not deleted
+          return db._read('SELECT COUNT(*) AS count FROM fxa_oauth.tokens WHERE clientId=UNHEX(?) AND expiresAt > NOW();', [
+            clientIdB
+          ]);
+        })
+        .then( function (result) {
+          assert.equal(result[0].count, 500);
+        })
+        .then( function () {
+          // Check the total tokens
+          return db._read('SELECT COUNT(*) AS count FROM fxa_oauth.tokens;');
+        })
+        .then( function (result) {
+          assert.equal(result[0].count, 1500);
+        });
+    });
 
+    if (purgeMethod === db.purgeExpiredTokens) {
+      // purgepurgeExpiredTokensById cannot meet the expectations of this
+      // test. Not less correct, just different.
       it('should call purgeExpiredTokens and only purge 100 items', function() {
         return purgeMethod(100, 0, clientIdA, 1000)
           .then( function () {
