@@ -148,7 +148,7 @@ function makeTests(name, purgeMethod) {
     });
 
     if (purgeMethod === db.purgeExpiredTokens) {
-      // purgepurgeExpiredTokensById cannot meet the expectations of this
+      // purgeExpiredTokensById cannot meet the expectations of this
       // test. Not less correct, just different.
       it('should call purgeExpiredTokens and only purge 100 items', function() {
         return purgeMethod(100, 0, clientIdA, 1000)
