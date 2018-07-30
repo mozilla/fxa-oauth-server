@@ -2880,6 +2880,23 @@ describe('/v1', function() {
       });
     });
 
+    it('should include associate associatedRefreshToken', function() {
+      var refresh;
+      return newToken({ access_type: 'offline' }).then(function(res) {
+        refresh = res.result.refresh_token;
+        assert.equal(res.statusCode, 200);
+        assertSecurityHeaders(res);
+        return Server.api.post({
+          url: '/verify',
+          payload: {
+            token: res.result.access_token
+          }
+        });
+      }).then(function(res) {
+        assert.equal(res.statusCode, 200);
+        assert.equal(res.result.associatedRefreshToken, encrypt.hash(refresh).toString('hex'));
+      });
+    });
   });
 
   describe('/destroy', function() {
