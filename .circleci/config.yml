@@ -10,6 +10,10 @@ jobs:
   build:
     docker:
       - image: circleci/node
+      - image: mysql:5.6
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+
     steps:
       - checkout
       - setup_remote_docker
@@ -38,11 +42,6 @@ jobs:
       - run:
           name: Build test container image
           command: docker build -f Dockerfile-test -t fxa-oauth-server:test .
-
-      - run:
-          name: Start mysql
-          command: docker pull mysql/mysql-server:5.6 && docker run -d --name=mydb -e MYSQL_ALLOW_EMPTY_PASSWORD=true -e MYSQL_ROOT_HOST=% -p 3306:3306 mysql/mysql-server:5.6
-          background: true
 
       - run:
           name: Run Memory DB Tests
