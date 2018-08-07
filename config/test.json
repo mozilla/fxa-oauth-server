@@ -68,6 +68,16 @@
       "allowedScopes": "https://identity.mozilla.com/apps/sample-scope-can-scope-key https://identity.mozilla.com/apps/sample-scope kv https://identity.mozilla.com/apps/another-can-scope-key",
       "canGrant": false,
       "publicClient": false
+    },
+    {
+      "id": "9b3a65a138a6b871",
+      "hashedSecret": "913ff3d99d5c8caf191caa0897ee34de16f22b0205955b0e6883fe3f00b309f7",
+      "name": "Public Client",
+      "imageUri": "https://mozorg.cdn.mozilla.net/media/img/firefox/new/header-firefox.png",
+      "redirectUri": "https://example.domain/return?foo=bar",
+      "trusted": true,
+      "canGrant": true,
+      "publicClient": true
     }
   ],
   "logging": {
