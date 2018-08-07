@@ -46,7 +46,9 @@ CREATE TABLE IF NOT EXISTS tokens (
   scope VARCHAR(256) NOT NULL,
   createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   expiresAt TIMESTAMP NOT NULL,
-  INDEX idx_expiresAt(expiresAt)
+  INDEX idx_expiresAt(expiresAt),
+  associatedRefreshToken BINARY(32),
+  FOREIGN KEY (associatedRefreshToken) REFERENCES refreshTokens(token) ON DELETE CASCADE
 ) ENGINE=InnoDB CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS developers (

@@ -1464,6 +1464,9 @@ describe('/v1', function() {
                 config.get('unique.token') * 2);
               assert.equal(res.result.scope, 'foo bar');
               assert.equal(res.result.auth_at, AUTH_AT);
+              return db.getAccessToken(encrypt.hash(res.result.access_token)).then(function(tok) {
+                assert.deepEqual(tok.associatedRefreshToken, encrypt.hash(res.result.refresh_token));
+              });
             });
           });
         });
@@ -1559,6 +1562,9 @@ describe('/v1', function() {
             assert(res.result.expires_in);
             assert(res.result.access_token);
             assert.equal(res.result.refresh_token, undefined);
+            return db.getAccessToken(encrypt.hash(res.result.access_token)).then(function(tok) {
+              assert.deepEqual(tok.associatedRefreshToken, encrypt.hash(refresh));
+            });
           });
         });
 
