@@ -13,6 +13,7 @@ jobs:
       - image: mysql:5.6
         environment:
           MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_ROOT_HOST: "%"
 
     steps:
       - checkout
@@ -49,7 +50,7 @@ jobs:
 
       - run:
           name: Run MySQL DB Tests
-          command: docker run -e DB="mysql" fxa-oauth-server:test npm test
+          command: docker run --net=host -e DB="mysql" fxa-oauth-server:test npm test
 
       - run:
           name: Push to Dockerhub
