@@ -42,5 +42,4 @@ before_script:
 script:
   - npm run outdated
   - npm test
-  # HACK: ignore npm audit errors for now until we get them all fixed
-  - npm audit || true
+  - npm audit
