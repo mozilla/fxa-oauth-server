@@ -79,7 +79,10 @@
       "imageUri": "https://example2.domain/logo",
       "redirectUri": "https://example2.domain/return?foo=bar",
       "trusted": true,
-      "canGrant": true
+      "canGrant": true,
+      "trusted": true,
+      "publicClient": true,
+      "allowedScopes": "https://identity.mozilla.com/apps/oldsync"
     },
     {
       "name": "FxA OAuth Console",
@@ -133,7 +136,8 @@
       "imageUri": "",
       "redirectUri": "urn:ietf:wg:oauth:2.0:oob",
       "trusted": true,
-      "canGrant": true
+      "canGrant": true,
+      "publicClient": true
     }
   ],
   "localRedirects": true,
